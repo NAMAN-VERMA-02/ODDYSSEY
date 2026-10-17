@@ -13,6 +13,9 @@ export function PublicHeader({ minimal = false }: { minimal?: boolean }) {
         <nav aria-label="Account" className="flex items-center gap-2">
           <ThemeToggle />
           {!minimal && (<>
+          <Link href="/live" className="hidden rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--paper)] sm:inline-block">
+            Live Network
+          </Link>
           <Link href="/login" className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--paper)]">
             Log in
           </Link>

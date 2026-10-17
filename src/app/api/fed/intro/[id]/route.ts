@@ -22,6 +22,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const pids = new Set<string>([intro.requester, intro.target, ...(hops ?? []).flatMap((h) => [h.from_pid, h.to_pid])]);
   const people = [...pids].map((p) => dir.get(p)).filter(Boolean).map((d) => publicCard(d!));
 
+  const { data: edgeRows } = await db.from("fed_graph").select("a, b, p").in("a", [...pids]).in("b", [...pids]);
   const stage = isStage(req);
   const links = stage
     ? Object.fromEntries((hops ?? []).filter((h) => h.status === "sent").map((h) => [h.id, hopUrl(siteUrl(), secret("HOP_TOKEN_SECRET"), h.id)]))
@@ -32,6 +33,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     hops,
     events,
     people,
+    edges: (edgeRows ?? []).map((e) => ({ a: e.a, b: e.b, p: e.p })),
     isRequester: session?.pid === intro.requester,
     // the requester (or the stage) reads names from the colleges with these
     viewer: session && session.pid === intro.requester ? viewerTokensFor(session.pid) : stage ? viewerTokensFor(intro.requester) : null,

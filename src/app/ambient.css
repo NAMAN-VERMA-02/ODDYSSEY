@@ -97,3 +97,26 @@ main article.rounded-\[22px\]:hover {
     animation: none;
   }
 }
+
+/* "+10 Points" pop on the helper's phone */
+.points-pop {
+  animation: points-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes points-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .points-pop {
+    animation: none;
+  }
+}
