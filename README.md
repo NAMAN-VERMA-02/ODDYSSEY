@@ -18,11 +18,14 @@ Repository: `ODDYSSEY` · Built for a hackathon.
 | **Introductions through a senior** | If a matched senior knows people at the student's target company (a count, never names), the student can ask that senior to pass the question on. Never more than 2 hops. The senior forwards a one-time link from their own phone; the recipient replies in one tap with no sign-up. |
 | **Trust ladder** | A question → a 15-minute call → a small task → a referral. A referral unlocks only after the senior has seen the student's work. |
 | **Pay it forward ×3** | When someone lands a role, SETU shows three juniors whose "today" matches their "yesterday" and asks for one answer each. |
-| **College dashboard** | For the placement cell: students on SETU, first-reply rate, how far requests climb the ladder, placements, and help paid forward. |
+| **Vouches** | A senior who has seen a student's work (or a faculty member) puts their name to a skill. Vouches show on the profile and lift the student in people search. |
+| **Messages** | Connected people talk in `/messages`, live. Only the two people in a thread can read it, and it stops if the connection ends. |
+| **Updates** | Requests, connection news, vouches, interest in your opportunities and college announcements land in `/notifications`, with an unread badge. An opt-out weekly email is ready once an email provider is configured. |
+| **College dashboard** | For the placement cell: students on SETU, first-reply rate, how far requests climb the ladder, placements, help paid forward, and how the wider network is being used. It also imports the alumni list (`/college/import`, see who has joined) and posts announcements and events (`/announcements`). |
 | **Draft-writing agent** | An LLM agent reads the student's journey and matches and drafts first messages. The student edits and sends them. See [docs/agent.md](docs/agent.md). |
 | **LinkedIn PDF import** | The student's own "Save to PDF" is read once by an LLM into a semester-by-semester draft. The file is never stored. |
 
-## Try the demo (about 7 minutes)
+## Try the demo (about 10 minutes)
 
 Prerequisite: the app is running with the sample data loaded (see [Setup](#setup)).
 
@@ -37,7 +40,10 @@ Prerequisite: the app is running with the sample data loaded (see [Setup](#setup
 9. **Opportunities.** At `/opportunities` filter by type, read the "why this fits you" notes, and show interest in one.
 10. **As a poster.** Log in as an alumnus, faculty member or recruiter: post at `/opportunities/new`, then open `/opportunities/mine` to see who is interested and shortlist them.
 11. **Invite a recruiter.** As an alumnus, create an invite at `/invites`, then open the link in a private window and sign up with any email.
-12. **Climb the ladder, pay it forward, and the college dashboard** at `/requests`, `/payitforward` and `/college` (placement accounts only, see below).
+12. **Vouch and message.** As an alumnus who has seen a student's work, open the student's profile and vouch for a skill. Message any connection from their profile (`/messages`); the other side's header badge lights up live.
+13. **Updates.** The student's `/notifications` now shows the vouch and the new connection request.
+14. **Placement cell.** At `/college/import` paste a short CSV (`name,batch,branch,email`) and watch the joined count; post an announcement or event at `/announcements`; everyone gets an update.
+15. **Climb the ladder, pay it forward, and the college dashboard** at `/requests`, `/payitforward` and `/college` (placement accounts only, see below).
 
 ## Stack
 
@@ -77,6 +83,8 @@ npm test                     # unit tests
 | `SUPABASE_SERVICE_ROLE_KEY` | matching, pay it forward, agent | **secret**: server only, bypasses RLS; results are sanitised before they leave the server |
 | `LLM_API_KEY` | PDF import, draft agent | **secret**. A Google Gemini key works out of the box (free key at aistudio.google.com/apikey) |
 | `LLM_PROVIDER` | optional | `gemini` (default) or `anthropic` |
+| `CRON_SECRET` | weekly email | **secret**. Vercel Cron sends it as a bearer token to `/api/cron/digest`; without it the route refuses everyone |
+| `RESEND_API_KEY` and `DIGEST_FROM` | weekly email | **secret** and a verified sender. Without them the cron route sends nothing |
 | `LLM_MODEL` | optional | overrides the default model (`gemini-3.8-flash`, or `claude-opus-5-5` for Anthropic) |
 
 ### Database
@@ -123,15 +131,16 @@ Designed on the principles of India's DPDP Act 2023 (data minimisation, separate
 
 ## What is built and what is not
 
-Built: signup with college-email verification and the 18+ check, journey form, LinkedIn PDF import, match scoring with rarity, route map, asks with the trust ladder, bridge forward links, silent declines, requests inbox, pay it forward, college dashboard, draft agent with guardrails, role-based profiles and intents, people search with reasons, opportunities board (post, rank, interest, shortlist), connections and the network graph, invite-based signup for recruiters and founders, role-aware dashboards, and demo data for all of it.
+Built: signup with college-email verification and the 18+ check, journey form, LinkedIn PDF import, match scoring with rarity, route map, asks with the trust ladder, bridge forward links, silent declines, requests inbox, pay it forward, college dashboard, draft agent with guardrails, role-based profiles and intents, people search with reasons, opportunities board (post, rank, interest, shortlist), connections and the network graph, invite-based signup for recruiters and founders, role-aware dashboards, vouches, in-app messaging with live updates, alumni import and announcements for the placement cell, notifications with an unread badge, and demo data for all of it.
 
 Not built yet, and not claimed:
 
-- Vouches (seniors vouching for a student's skills after seeing their work) and recruiter candidate search built on them.
-- In-app messaging and real-time updates.
+- A recruiter-specific candidate search page (vouches already lift students in `/people`, but there is no dedicated recruiter view).
+- Sending the invitation emails for imported alumni from SETU itself: the placement cell gets a ready-written message that opens in its own mail app.
+- The weekly email has been unit-tested for content only. It has not been sent for real: it needs `RESEND_API_KEY`, `DIGEST_FROM` and `CRON_SECRET` in Vercel.
+- WhatsApp notifications, push notifications, and multi-college institutions.
+- Read receipts, typing indicators, attachments and group chats in messaging.
 - Entering company counts, and the in-browser LinkedIn *connections* parser that would send only "company: count".
-- Importing the alumni list by the placement cell, announcements, and multi-college institutions.
-- Email or WhatsApp notifications and digests.
 - The "route did not work" markers on the route map (no outcome data for it yet).
 - Shared rate limiting beyond the agent (the PDF import limit is per server instance).
 - The AI providers have been unit-tested with scripted models only. The Gemini adapter has not been run against the live API yet.
