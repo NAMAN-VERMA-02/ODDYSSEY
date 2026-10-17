@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { CursorFx } from "@/components/fx/cursor-fx";
+import { INTRO_SCRIPT } from "@/components/fx/intro-script";
+import { Preloader } from "@/components/fx/preloader";
+import { ScrollReveal } from "@/components/fx/scroll-reveal";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,6 +16,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Italic serif used for single accent words inside big sans headlines.
+const serif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
   title: "KAL — their yesterday is your tomorrow",
   description: "A college alumni network that matches you to seniors who were once where you are.",
@@ -21,9 +33,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${serif.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
+      </head>
+      <body id="top" className="min-h-full flex flex-col">
+        <Preloader />
+        {children}
+        <ScrollReveal />
+        <CursorFx />
+      </body>
     </html>
   );
 }
