@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
+import { SiteFooter } from "@/components/site-footer";
 import { checklist, firstName, formatBranch, nextStep, type DashboardState } from "@/lib/dashboard/next-step";
 import { CountUp } from "./count-up";
-import { Marquee } from "./marquee";
 
 export type DashboardData = {
   fullName: string;
@@ -198,10 +198,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
         </div>
       </main>
 
-      <Marquee />
-      <footer className="px-4 py-6 text-center text-xs text-[var(--muted)]">
-        KAL · your college’s own network · marks shown only as ranges, only if you switch them on
-      </footer>
+      <SiteFooter />
     </>
   );
 }
