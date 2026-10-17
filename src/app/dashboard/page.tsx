@@ -31,6 +31,7 @@ async function Profile() {
       </p>
       <p className="mb-6">
         <Link href="/matches" className="underline">See your matches</Link>{" · "}
+        <Link href="/requests" className="underline">Requests</Link>{" · "}
         <Link href="/onboarding" className="underline">Edit your journey</Link>
       </p>
       <form action={signOut}>
