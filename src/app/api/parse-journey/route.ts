@@ -1,13 +1,8 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { NextResponse, type NextRequest } from "next/server";
+import { extractFromPdf } from "@/lib/llm/extract";
+import { readLlmConfig } from "@/lib/llm/config";
 import { createClient } from "@/lib/supabase/server";
-import {
-  SYSTEM_PROMPT,
-  calendarNote,
-  modelOutputSchema,
-  normalizeDraft,
-} from "@/lib/llm/journey";
+import { SYSTEM_PROMPT, calendarNote, modelOutputSchema, normalizeDraft } from "@/lib/llm/journey";
 
 export const maxDuration = 60;
 
@@ -38,14 +33,10 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) return fail("Sign in to continue.", 401);
 
-  const apiKey = process.env.LLM_API_KEY;
-  if (!apiKey) return fail("PDF import is not configured yet.", 503);
+  const config = readLlmConfig();
+  if (!config) return fail("PDF import is not configured yet.", 503);
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("batch")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } = await supabase.from("users").select("batch").eq("id", user.id).single();
   if (!profile) return fail("Finish signing up first.", 403);
 
   if (!allowed(user.id)) return fail("Too many imports. Try again later.", 429);
@@ -66,36 +57,16 @@ export async function POST(request: NextRequest) {
     return fail("That file is not a PDF.", 415);
   }
 
-  const client = new Anthropic({ apiKey });
-  try {
-    // The PDF is processed in memory and never stored.
-    const response = await client.messages.parse({
-      model: process.env.LLM_MODEL ?? "claude-opus-5-5",
-      max_tokens: 8000,
-      system: SYSTEM_PROMPT,
-      output_config: { effort: "low", format: zodOutputFormat(modelOutputSchema) },
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "document",
-              source: { type: "base64", media_type: "application/pdf", data: bytes.toString("base64") },
-            },
-            { type: "text", text: calendarNote(profile.batch) },
-          ],
-        },
-      ],
-    });
+  // The PDF is processed in memory and never stored.
+  const result = await extractFromPdf({
+    config,
+    system: SYSTEM_PROMPT,
+    pdf: bytes,
+    text: calendarNote(profile.batch),
+    schema: modelOutputSchema,
+  });
 
-    if (response.stop_reason === "refusal" || !response.parsed_output) {
-      return fail("We could not read that PDF. Fill the form by hand instead.", 422);
-    }
-    return NextResponse.json({ draft: normalizeDraft(response.parsed_output) });
-  } catch (error) {
-    if (error instanceof Anthropic.RateLimitError) return fail("The import service is busy. Try again soon.", 503);
-    if (error instanceof Anthropic.BadRequestError) return fail("We could not read that PDF.", 422);
-    console.error("parse-journey failed", error instanceof Error ? error.message : error);
-    return fail("Import failed. Fill the form by hand instead.", 502);
-  }
+  if (result.ok) return NextResponse.json({ draft: normalizeDraft(result.data) });
+  if (result.reason === "unavailable") return fail("Import failed. Fill the form by hand instead.", 502);
+  return fail("We could not read that PDF. Fill the form by hand instead.", 422);
 }

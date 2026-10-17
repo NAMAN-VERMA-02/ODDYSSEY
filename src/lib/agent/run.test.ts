@@ -1,5 +1,5 @@
-import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
+import type { AgentSession, AgentTurn, ToolCall, ToolResult } from "@/lib/llm/agent-session";
 import type { Match } from "@/lib/scoring";
 import type { MatchResponse } from "@/lib/scoring/response";
 import { MAX_TOOL_CALLS, MAX_TURNS, runDraftAgent, type AgentDeps } from "./run";
@@ -30,55 +30,46 @@ const body = (bridgeBlocked = false): MatchResponse => ({
   matches: [match("a"), match("b")],
 });
 
-type Turn = Anthropic.ContentBlock[] | { stop: "refusal" | "max_tokens" };
+type Turn = ToolCall[] | { stop: "refusal" | "max_tokens" | "end" };
 
-function use(id: string, name: string, input: unknown): Anthropic.ToolUseBlock {
-  return { type: "tool_use", id, name, input } as Anthropic.ToolUseBlock;
-}
+const call = (id: string, name: string, input: unknown): ToolCall => ({ id, name, input });
 
-/** A scripted model: each call to create() returns the next turn. */
+/** A scripted model: each call to next() returns the next turn and records what it was sent. */
 function script(turns: Turn[]) {
-  const calls: Anthropic.MessageCreateParamsNonStreaming[] = [];
+  const received: (ToolResult[] | null)[] = [];
   let i = 0;
-  const create: AgentDeps["create"] = async (params) => {
-    calls.push(JSON.parse(JSON.stringify(params)));
-    const turn = turns[Math.min(i++, turns.length - 1)];
-    const stop = Array.isArray(turn) ? (turn.some((b) => b.type === "tool_use") ? "tool_use" : "end_turn") : turn.stop;
-    return {
-      id: `m${i}`,
-      type: "message",
-      role: "assistant",
-      model: "test",
-      content: Array.isArray(turn) ? turn : [],
-      stop_reason: stop,
-      usage: { input_tokens: 100, output_tokens: 50 },
-    } as unknown as Anthropic.Message;
+  const session: AgentSession = {
+    async next(results) {
+      received.push(results);
+      const turn = turns[Math.min(i++, turns.length - 1)];
+      const out: AgentTurn = Array.isArray(turn)
+        ? { stop: "tool_use", calls: turn, usage: { input: 100, output: 50 } }
+        : { stop: turn.stop, calls: [], usage: { input: 100, output: 50 } };
+      return out;
+    },
   };
-  return { create, calls };
+  return { session, received };
 }
 
-const deps = (create: AgentDeps["create"], over: Partial<AgentDeps> = {}): AgentDeps => ({
-  model: "test-model",
-  create,
+const deps = (session: AgentSession, over: Partial<AgentDeps> = {}): AgentDeps => ({
+  session,
   getJourney: async () => ({ goal: { target: "SDE at Cognizant" }, semesters: [] }),
   getMatches: async () => ({ ok: true, body: body() }),
   ...over,
 });
 
 const good = {
-  drafts: [
-    { match_id: "a", route: "bridge", message: "How did you prepare for the online test?", why: "Shares a backlog" },
-  ],
+  drafts: [{ match_id: "a", route: "bridge", message: "How did you prepare for the online test?", why: "Shares a backlog" }],
 };
 
 describe("runDraftAgent", () => {
   it("reads the journey and matches, then submits checked drafts", async () => {
-    const { create, calls } = script([
-      [use("t1", "get_my_journey", {})],
-      [use("t2", "find_matches", {})],
-      [use("t3", "submit_drafts", good)],
+    const { session, received } = script([
+      [call("t1", "get_my_journey", {})],
+      [call("t2", "find_matches", {})],
+      [call("t3", "submit_drafts", good)],
     ]);
-    const r = await runDraftAgent(deps(create));
+    const r = await runDraftAgent(deps(session));
     expect(r.status).toBe("ok");
     expect(r.turns).toBe(3);
     expect(r.toolCalls).toBe(3);
@@ -87,33 +78,27 @@ describe("runDraftAgent", () => {
     expect(r.drafts[0].targetCompany).toBe("Cognizant");
     expect(r.drafts[0].message.startsWith("You also had 1 backlog")).toBe(true);
     expect(r.inputTokens).toBe(300);
-    // Tool results go back in a single user message.
-    const last = calls[2].messages.at(-1)!;
-    expect(last.role).toBe("user");
-  });
-
-  it("offers only read tools plus submit, and never a send tool", async () => {
-    const { create, calls } = script([[use("t1", "submit_drafts", { drafts: [] })]]);
-    await runDraftAgent(deps(create));
-    expect((calls[0].tools ?? []).map((t) => ("name" in t ? t.name : "")).sort()).toEqual(["find_matches", "get_my_journey", "submit_drafts"]);
+    // The first turn starts the conversation; later turns pass the tool results back.
+    expect(received[0]).toBeNull();
+    expect(received[1]?.[0]).toMatchObject({ id: "t1", name: "get_my_journey" });
   });
 
   it("gives the model one chance to fix rejected drafts", async () => {
     const bad = { drafts: [{ match_id: "a", route: "direct", message: "Can you refer me please?", why: "x" }] };
-    const { create } = script([
-      [use("t1", "find_matches", {})],
-      [use("t2", "submit_drafts", bad)],
-      [use("t3", "submit_drafts", good)],
+    const { session } = script([
+      [call("t1", "find_matches", {})],
+      [call("t2", "submit_drafts", bad)],
+      [call("t3", "submit_drafts", good)],
     ]);
-    const r = await runDraftAgent(deps(create));
+    const r = await runDraftAgent(deps(session));
     expect(r.status).toBe("ok");
     expect(r.drafts).toHaveLength(1);
   });
 
   it("stops after a second failed attempt and reports why", async () => {
     const bad = { drafts: [{ match_id: "a", route: "direct", message: "Can you refer me please?", why: "x" }] };
-    const { create } = script([[use("t1", "find_matches", {})], [use("t2", "submit_drafts", bad)], [use("t3", "submit_drafts", bad)]]);
-    const r = await runDraftAgent(deps(create));
+    const { session } = script([[call("t1", "find_matches", {})], [call("t2", "submit_drafts", bad)], [call("t3", "submit_drafts", bad)]]);
+    const r = await runDraftAgent(deps(session));
     expect(r.status).toBe("ok");
     expect(r.drafts).toEqual([]);
     expect(r.rejected[0].reason).toMatch(/never for a referral/);
@@ -121,38 +106,37 @@ describe("runDraftAgent", () => {
 
   it("rejects drafts for seniors that find_matches never returned", async () => {
     const forged = { drafts: [{ match_id: "not-a-match", route: "direct", message: "Hello there?", why: "x" }] };
-    const { create } = script([[use("t1", "find_matches", {})], [use("t2", "submit_drafts", forged)], [use("t3", "submit_drafts", forged)]]);
-    const r = await runDraftAgent(deps(create));
+    const { session } = script([[call("t1", "find_matches", {})], [call("t2", "submit_drafts", forged)], [call("t3", "submit_drafts", forged)]]);
+    const r = await runDraftAgent(deps(session));
     expect(r.drafts).toEqual([]);
   });
 
   it("does not offer a bridge when the student already has one open", async () => {
-    const { create } = script([[use("t1", "find_matches", {})], [use("t2", "submit_drafts", good)], [use("t3", "submit_drafts", good)]]);
-    const r = await runDraftAgent(deps(create, { getMatches: async () => ({ ok: true, body: body(true) }) }));
+    const { session } = script([[call("t1", "find_matches", {})], [call("t2", "submit_drafts", good)], [call("t3", "submit_drafts", good)]]);
+    const r = await runDraftAgent(deps(session, { getMatches: async () => ({ ok: true, body: body(true) }) }));
     expect(r.drafts).toEqual([]);
   });
 
   it("reports a refusal and a missing submission", async () => {
-    expect((await runDraftAgent(deps(script([{ stop: "refusal" }]).create))).status).toBe("refused");
-    expect((await runDraftAgent(deps(script([[{ type: "text", text: "done", citations: null } as Anthropic.TextBlock]]).create))).status).toBe("invalid");
+    expect((await runDraftAgent(deps(script([{ stop: "refusal" }]).session))).status).toBe("refused");
+    expect((await runDraftAgent(deps(script([{ stop: "end" }]).session))).status).toBe("invalid");
   });
 
   it("is cut off by the turn and tool-call limits", async () => {
-    const loop = script([[use("t", "get_my_journey", {})]]);
-    const r = await runDraftAgent(deps(loop.create));
+    const loop = script([[call("t", "get_my_journey", {})]]);
+    const r = await runDraftAgent(deps(loop.session));
     expect(r.status).toBe("limit");
     expect(r.turns).toBeLessThanOrEqual(MAX_TURNS);
     expect(r.toolCalls).toBeLessThanOrEqual(MAX_TOOL_CALLS + 1);
 
-    const many = script([Array.from({ length: MAX_TOOL_CALLS + 2 }, (_, i) => use(`t${i}`, "get_my_journey", {}))]);
-    expect((await runDraftAgent(deps(many.create))).status).toBe("limit");
+    const many = script([Array.from({ length: MAX_TOOL_CALLS + 2 }, (_, i) => call(`t${i}`, "get_my_journey", {}))]);
+    expect((await runDraftAgent(deps(many.session))).status).toBe("limit");
   });
 
   it("passes tool errors back to the model instead of crashing", async () => {
-    const { create, calls } = script([[use("t1", "find_matches", {})], [use("t2", "submit_drafts", { drafts: [] })]]);
-    const r = await runDraftAgent(deps(create, { getMatches: async () => ({ ok: false, error: "Share your journey first." }) }));
+    const { session, received } = script([[call("t1", "find_matches", {})], [call("t2", "submit_drafts", { drafts: [] })]]);
+    const r = await runDraftAgent(deps(session, { getMatches: async () => ({ ok: false, error: "Share your journey first." }) }));
     expect(r.status).toBe("ok");
-    const toolResult = JSON.stringify(calls[1].messages.at(-1));
-    expect(toolResult).toContain("is_error");
+    expect(received[1]?.[0]).toMatchObject({ isError: true });
   });
 });

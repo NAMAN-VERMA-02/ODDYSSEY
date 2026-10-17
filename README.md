@@ -34,7 +34,7 @@ Prerequisite: the app is running with the sample data loaded (see [Setup](#setup
 
 ## Stack
 
-Next.js 16 (App Router, TypeScript, Tailwind, mobile-first) · Supabase (Postgres, Auth, Row Level Security) · Claude API for the PDF import and the draft agent · D3 (`d3-hierarchy`, `d3-shape`) for the route map · Vitest.
+Next.js 16 (App Router, TypeScript, Tailwind, mobile-first) · Supabase (Postgres, Auth, Row Level Security) · Gemini (default) or Claude for the PDF import and the draft agent, behind one provider switch · D3 (`d3-hierarchy`, `d3-shape`) for the route map · Vitest.
 
 ```
 src/
@@ -68,7 +68,9 @@ npm test                     # unit tests
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | everything | the public anon or publishable key |
 | `NEXT_PUBLIC_SITE_URL` | email links, forward links | `http://localhost:3000` locally; your production URL when deployed |
 | `SUPABASE_SERVICE_ROLE_KEY` | matching, pay it forward, agent | **secret**: server only, bypasses RLS; results are sanitised before they leave the server |
-| `LLM_API_KEY` | PDF import, draft agent | **secret**; `LLM_MODEL` optionally overrides the default model |
+| `LLM_API_KEY` | PDF import, draft agent | **secret**. A Google Gemini key works out of the box (free key at aistudio.google.com/apikey) |
+| `LLM_PROVIDER` | optional | `gemini` (default) or `anthropic` |
+| `LLM_MODEL` | optional | overrides the default model (`gemini-3.8-flash`, or `claude-opus-5-5` for Anthropic) |
 
 ### Database
 

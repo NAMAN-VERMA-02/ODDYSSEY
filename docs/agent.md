@@ -77,4 +77,4 @@ Nothing is sent by the agent. Each draft sits in an editable text box with **Sen
 
 ## Configuration
 
-`LLM_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` must be set. `LLM_MODEL` defaults to `claude-opus-5-5`.
+`LLM_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` must be set. `LLM_PROVIDER` is `gemini` (default) or `anthropic`; `LLM_MODEL` overrides the default model. The guardrails run outside the model, so they are identical for both providers.

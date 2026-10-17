@@ -1,7 +1,10 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { journeySummary } from "@/lib/agent/tools";
-import { runDraftAgent, type AgentResult, type AgentStatus } from "@/lib/agent/run";
+import { SYSTEM_PROMPT } from "@/lib/agent/prompt";
+import { FIRST_MESSAGE, MAX_OUTPUT_TOKENS, runDraftAgent, type AgentResult, type AgentStatus } from "@/lib/agent/run";
+import { TOOLS } from "@/lib/agent/tools";
+import { createAgentSession } from "@/lib/llm/agent-session";
+import { readLlmConfig } from "@/lib/llm/config";
 import { computeMatches } from "@/lib/match/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -31,9 +34,9 @@ export async function POST() {
   } = await supabase.auth.getUser();
   if (!user) return fail("Sign in to continue.", 401);
 
-  const apiKey = process.env.LLM_API_KEY;
+  const config = readLlmConfig();
   const admin = createAdminClient();
-  if (!apiKey || !admin) return fail("Message drafting is not configured yet.", 503);
+  if (!config || !admin) return fail("Message drafting is not configured yet.", 503);
 
   // Give to get: no drafts before the student has shared their own journey.
   const { count: journeyCount } = await supabase
@@ -51,8 +54,6 @@ export async function POST() {
     .gt("created_at", since);
   if ((recent ?? 0) >= RUNS_PER_HOUR) return fail("You have used all your drafts for now. Try again in an hour.", 429);
 
-  const client = new Anthropic({ apiKey });
-
   let matchesOnce: ReturnType<typeof computeMatches> | null = null;
   const getMatches = async () => {
     matchesOnce ??= computeMatches(supabase, admin, user.id);
@@ -63,8 +64,7 @@ export async function POST() {
   let result: AgentResult;
   try {
     result = await runDraftAgent({
-      model: process.env.LLM_MODEL ?? "claude-opus-5-5",
-      create: (params) => client.messages.create(params),
+      session: createAgentSession({ config, system: SYSTEM_PROMPT, tools: TOOLS, firstMessage: FIRST_MESSAGE, maxOutputTokens: MAX_OUTPUT_TOKENS }),
       getMatches,
       getJourney: async () => {
         const [{ data: goal }, { data: snapshots }] = await Promise.all([

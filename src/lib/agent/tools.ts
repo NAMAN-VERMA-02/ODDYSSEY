@@ -1,27 +1,25 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import type { NeutralTool } from "@/lib/llm/agent-session";
 import type { Match } from "@/lib/scoring";
 import { sanitizeUntrusted } from "./guardrails";
 
-export const TOOLS: Anthropic.Tool[] = [
+export const TOOLS: NeutralTool[] = [
   {
     name: "get_my_journey",
     description:
       "The student's own goal and their semester-by-semester journey (skills, what they were doing, direction, backlogs).",
-    input_schema: { type: "object", properties: {}, additionalProperties: false },
-    strict: true,
+    schema: { type: "object", properties: {}, additionalProperties: false },
   },
   {
     name: "find_matches",
     description:
       "Seniors from the student's college who were in the same semester as the student is now, best matches first. Each has an id, a first_line to open with, what they share, and the routes available (direct, or via_senior with a company).",
-    input_schema: { type: "object", properties: {}, additionalProperties: false },
-    strict: true,
+    schema: { type: "object", properties: {}, additionalProperties: false },
   },
   {
     name: "submit_drafts",
     description:
       "Submit up to three drafted first messages, one per senior. This ends the task. The student reviews them before anything is sent.",
-    input_schema: {
+    schema: {
       type: "object",
       properties: {
         drafts: {
@@ -42,7 +40,6 @@ export const TOOLS: Anthropic.Tool[] = [
       required: ["drafts"],
       additionalProperties: false,
     },
-    strict: true,
   },
 ];
 
