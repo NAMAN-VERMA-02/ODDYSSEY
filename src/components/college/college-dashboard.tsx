@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { pct, type CollegeStats } from "@/lib/college/stats";
 
 function Tile({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone: string }) {
@@ -30,6 +31,37 @@ export function CollegeDashboard({ stats }: { stats: CollegeStats }) {
         <Tile label="Landed a role" value={String(stats.placed)} sub="members who shared a success" tone="var(--yellow)" />
         <Tile label="Paid forward" value={String(stats.helps)} sub={`answers from ${stats.helpers} seniors · ${stats.help_owed_open} still owed`} tone="var(--sage)" />
       </ul>
+
+      {stats.network && (
+        <section aria-labelledby="net-h" className="reveal rounded-[22px] bg-white p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)] sm:p-8">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 id="net-h" className="text-2xl font-black uppercase tracking-tight">The network at work</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">Opportunities, connections and conversations across your college.</p>
+            </div>
+            <div className="flex gap-2 text-sm font-semibold">
+              <Link href="/college/import" className="rounded-full border border-[var(--ink)] px-4 py-1.5 hover:bg-[var(--ink)] hover:text-white">Import alumni</Link>
+              <Link href="/announcements" className="rounded-full border border-[var(--ink)] px-4 py-1.5 hover:bg-[var(--ink)] hover:text-white">Post an announcement</Link>
+            </div>
+          </div>
+          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              ["Open opportunities", `${stats.network.opportunities_open}`, `${stats.network.opportunities_total} posted in all`],
+              ["Applications", `${stats.network.applications}`, "people showed interest"],
+              ["Connections", `${stats.network.connections}`, "accepted across the college"],
+              ["Vouches", `${stats.network.vouches}`, "seniors backing a skill"],
+              ["Conversations", `${stats.network.conversations}`, `${stats.network.messages_7d} messages this week`],
+              ["Alumni imported", `${stats.network.imported}`, `${stats.network.imported_joined} have joined`],
+            ].map(([label, value, sub]) => (
+              <div key={label}>
+                <dt className="text-sm font-medium">{label}</dt>
+                <dd className="text-4xl font-black leading-tight tracking-tight">{value}</dd>
+                <dd className="text-xs text-[var(--muted)]">{sub}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
 
       <section aria-labelledby="ladder-h" className="reveal rounded-[22px] bg-white p-5 sm:p-8 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
         <h2 id="ladder-h" className="text-2xl font-black uppercase tracking-tight">Climbing the trust ladder</h2>

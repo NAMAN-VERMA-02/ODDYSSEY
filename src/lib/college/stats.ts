@@ -12,6 +12,20 @@ export type CollegeStats = {
   helps: number;
   helpers: number;
   help_owed_open: number;
+  network?: NetworkStats;
+};
+
+/** The "network" section of college_stats(): what the wider network is doing at this college. */
+export type NetworkStats = {
+  opportunities_open: number;
+  opportunities_total: number;
+  applications: number;
+  connections: number;
+  vouches: number;
+  conversations: number;
+  messages_7d: number;
+  imported: number;
+  imported_joined: number;
 };
 
 /** Whole-number percentage; 0 when there is nothing to divide by. */
