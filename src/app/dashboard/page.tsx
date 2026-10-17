@@ -32,7 +32,14 @@ async function Profile() {
       <p className="mb-6">
         <Link href="/matches" className="underline">See your matches</Link>{" · "}
         <Link href="/requests" className="underline">Requests</Link>{" · "}
+        <Link href="/payitforward" className="underline">Pay it forward</Link>{" · "}
         <Link href="/onboarding" className="underline">Edit your journey</Link>
+        {profile.role === "placement" && (
+          <>
+            {" · "}
+            <Link href="/college" className="underline">College dashboard</Link>
+          </>
+        )}
       </p>
       <form action={signOut}>
         <button type="submit" className="rounded-full border border-[var(--ink)] px-6 py-2 font-semibold">
