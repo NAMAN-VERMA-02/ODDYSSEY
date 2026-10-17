@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { PageShell } from "@/components/page-shell";
 import { createClient } from "@/lib/supabase/server";
 import { MatchesView } from "./matches-view";
 
@@ -26,19 +26,14 @@ async function Matches() {
 
 export default function MatchesPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:py-14">
-      <p className="mb-2 text-sm">
-        <Link href="/dashboard" className="underline">
-          Dashboard
-        </Link>
-      </p>
-      <h1 className="mb-8 text-5xl font-black uppercase leading-none tracking-tight sm:text-7xl">
-        Where you are, <br className="hidden sm:block" />
-        where they went
-      </h1>
+    <PageShell
+      eyebrow="Past-self matches"
+      title={["Where you are,", "where they went"]}
+      lede="Seniors from your college who stood in your exact position, and the routes they took next."
+    >
       <Suspense>
         <Matches />
       </Suspense>
-    </main>
+    </PageShell>
   );
 }

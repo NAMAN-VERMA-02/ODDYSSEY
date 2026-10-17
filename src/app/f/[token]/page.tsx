@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { PublicHeader } from "@/components/public-header";
+import { SiteFooter } from "@/components/site-footer";
 import { lookupForward } from "@/lib/asks/forward";
 import { replyAction } from "./actions";
 
@@ -94,10 +96,16 @@ async function Request({ params }: { params: Promise<{ token: string }> }) {
 
 export default function ForwardPage({ params }: { params: Promise<{ token: string }> }) {
   return (
-    <main className="mx-auto w-full max-w-lg px-4 py-12">
-      <Suspense>
-        <Request params={params} />
-      </Suspense>
-    </main>
+    <>
+      <PublicHeader minimal />
+      <main className="mx-auto w-full max-w-xl px-4 pb-20 pt-10 sm:pt-16">
+        <div className="rise rounded-[22px] bg-white p-6 shadow-[0_0_0_1px_rgba(15,15,14,.08),0_30px_60px_-40px_rgba(15,15,14,.35)] sm:p-8" style={{ "--d": "0.2s" } as React.CSSProperties}>
+          <Suspense>
+            <Request params={params} />
+          </Suspense>
+        </div>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CollegeDashboard } from "@/components/college/college-dashboard";
+import { PageShell } from "@/components/page-shell";
 import type { CollegeStats } from "@/lib/college/stats";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,19 +29,14 @@ async function Stats() {
 
 export default function CollegePage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:py-14">
-      <p className="mb-2 text-sm">
-        <Link href="/dashboard" className="underline">
-          Dashboard
-        </Link>
-      </p>
-      <h1 className="mb-8 text-5xl font-black uppercase leading-none tracking-tight sm:text-7xl">
-        Your college
-        <br className="hidden sm:block" /> on KAL
-      </h1>
+    <PageShell
+      eyebrow="For the placement cell"
+      title={["Your college", "on KAL"]}
+      lede="Engagement, how far requests climb the trust ladder, placements and help paid forward. Counts only."
+    >
       <Suspense>
         <Stats />
       </Suspense>
-    </main>
+    </PageShell>
   );
 }

@@ -9,7 +9,7 @@ async function LinkError({ searchParams }: { searchParams: Promise<{ error?: str
   const { error } = await searchParams;
   if (!error) return null;
   return (
-    <p role="alert" className="mb-4 text-sm text-[var(--red)]">
+    <p role="alert" className="mb-4 rounded-xl bg-[var(--red-tile)]/15 p-3 text-sm">
       We could not finish setting up your account. Confirm with your college email and try again.
     </p>
   );
@@ -21,8 +21,9 @@ export default function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   return (
-    <main className="mx-auto w-full max-w-md px-4 py-12">
-      <h1 className="mb-8 text-4xl font-black uppercase tracking-tight">Log in</h1>
+    <>
+      <h1 className="text-4xl font-black uppercase leading-none tracking-tight sm:text-5xl">Welcome back</h1>
+      <p className="mb-6 mt-2 text-[var(--muted)]">Log in with your college email.</p>
 
       <Suspense>
         <LinkError searchParams={searchParams} />
@@ -34,8 +35,11 @@ export default function LoginPage({
       </AuthForm>
 
       <p className="mt-6 text-sm">
-        New here? <Link href="/signup" className="underline">Join KAL</Link>
+        New here?{" "}
+        <Link href="/signup" className="font-semibold underline">
+          Join KAL
+        </Link>
       </p>
-    </main>
+    </>
   );
 }

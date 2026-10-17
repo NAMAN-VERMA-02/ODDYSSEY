@@ -7,9 +7,9 @@ export const metadata = { title: "Join KAL" };
 
 export default function SignupPage() {
   return (
-    <main className="mx-auto w-full max-w-md px-4 py-12">
-      <h1 className="mb-2 text-4xl font-black uppercase tracking-tight">Join KAL</h1>
-      <p className="mb-8 text-[var(--muted)]">Use your college email. You must be 18 or older.</p>
+    <>
+      <h1 className="text-4xl font-black uppercase leading-none tracking-tight sm:text-5xl">Join KAL</h1>
+      <p className="mb-6 mt-2 text-[var(--muted)]">Use your college email. You must be 18 or older.</p>
 
       <AuthForm action={signup} submitLabel="Create account">
         <Field label="Full name" name="fullName" autoComplete="name" required />
@@ -22,8 +22,11 @@ export default function SignupPage() {
       </AuthForm>
 
       <p className="mt-6 text-sm">
-        Already a member? <Link href="/login" className="underline">Log in</Link>
+        Already a member?{" "}
+        <Link href="/login" className="font-semibold underline">
+          Log in
+        </Link>
       </p>
-    </main>
+    </>
   );
 }

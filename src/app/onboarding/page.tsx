@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { PageShell } from "@/components/page-shell";
 import { createClient } from "@/lib/supabase/server";
 import { JourneyForm, type InitialJourney } from "./journey-form";
 
@@ -48,15 +49,23 @@ async function Journey() {
 
 export default function OnboardingPage() {
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-12">
-      <h1 className="mb-2 text-4xl font-black uppercase tracking-tight">Your journey</h1>
-      <p className="mb-8 text-[var(--muted)]">
-        Share where you are, semester by semester. KAL uses it to find seniors who stood exactly here.{" "}
-        <Link href="/dashboard" className="underline">Skip for now</Link>
-      </p>
-      <Suspense>
-        <Journey />
-      </Suspense>
-    </main>
+    <PageShell
+      eyebrow="About five minutes"
+      title={["Your", "journey"]}
+      lede={
+        <>
+          Share where you are, semester by semester. KAL uses it to find seniors who stood exactly here.{" "}
+          <Link href="/dashboard" className="underline">
+            Skip for now
+          </Link>
+        </>
+      }
+    >
+      <div className="max-w-2xl">
+        <Suspense>
+          <Journey />
+        </Suspense>
+      </div>
+    </PageShell>
   );
 }
