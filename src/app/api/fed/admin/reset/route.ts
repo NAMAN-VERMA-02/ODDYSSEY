@@ -32,6 +32,15 @@ async function insertChunks(table: string, rows: object[], size = 400, onConflic
 /** Resets the whole demo in a few seconds: nodes, hub tables, story edges, history, opportunities. Presenter only. */
 export async function POST(req: Request) {
   if (!isStage(req)) return fail("Presenter only.", 403);
+  try {
+    return await reset();
+  } catch (e) {
+    // say what went wrong instead of an empty 500, so the presenter (or a rehearsal script) can act on it
+    return fail(`Reset failed: ${e instanceof Error ? e.message : "unknown error"}`, 500);
+  }
+}
+
+async function reset() {
   const started = Date.now();
   const db = fedDb();
   await ensureNodes();
@@ -41,7 +50,21 @@ export async function POST(req: Request) {
   const resets = await Promise.all(configured.map((id) => nodeCall(id, "POST", "/admin/reset", {}, { timeoutMs: 8000, retries: 0, quiet: true })));
   const offline = configured.filter((_, i) => !resets[i].ok);
 
-  // 2. clear the hub (children first)
+  // 2. pull the pseudonymous directory and the intra-college edges from every node that is up.
+  // This happens BEFORE the hub is cleared, so a node that does not answer never leaves the hub empty.
+  const dirRows: (NodeDir & { node_id: NodeId })[] = [];
+  const edgeRows: NodeEdge[] = [];
+  await Promise.all(
+    configured.map(async (id) => {
+      const [d, e] = await Promise.all([nodeCall<NodeDir[]>(id, "GET", "/directory", undefined, { quiet: true }), nodeCall<NodeEdge[]>(id, "GET", "/edges", undefined, { quiet: true })]);
+      if (d.ok) dirRows.push(...d.data.map((r) => ({ ...r, node_id: id })));
+      if (e.ok) edgeRows.push(...e.data);
+    }),
+  );
+  if (!dirRows.length) return fail("No college server answered. Warm them up and try again.", 503, { offline });
+  if (dirRows.length < 20) return fail("A college server returned too few people. Warm them up and try again.", 503, { offline });
+
+  // 3. clear the hub (children first), then refill it
   const wipe = async (table: string, col: string, op: "neq" | "gt", value: string | number) => {
     const q = db.from(table).delete();
     const { error } = op === "neq" ? await q.neq(col, value as string) : await q.gt(col, value as number);
@@ -57,18 +80,6 @@ export async function POST(req: Request) {
   await wipe("fed_audit", "id", "gt", 0);
   await wipe("fed_edges", "a", "neq", "");
   await wipe("fed_directory", "pid", "neq", "");
-
-  // 3. pull the pseudonymous directory and the intra-college edges from every node that is up
-  const dirRows: (NodeDir & { node_id: NodeId })[] = [];
-  const edgeRows: NodeEdge[] = [];
-  await Promise.all(
-    configured.map(async (id) => {
-      const [d, e] = await Promise.all([nodeCall<NodeDir[]>(id, "GET", "/directory", undefined, { quiet: true }), nodeCall<NodeEdge[]>(id, "GET", "/edges", undefined, { quiet: true })]);
-      if (d.ok) dirRows.push(...d.data.map((r) => ({ ...r, node_id: id })));
-      if (e.ok) edgeRows.push(...e.data);
-    }),
-  );
-  if (!dirRows.length) return fail("No college server answered. Warm them up and try again.", 503, { offline });
   await insertChunks("fed_directory", dirRows);
 
   const pidByStory = new Map(dirRows.filter((r) => r.story_key).map((r) => [r.story_key as string, r.pid]));
