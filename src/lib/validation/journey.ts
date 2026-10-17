@@ -32,6 +32,8 @@ export const journeySchema = z
   .object({
     goalTarget: z.string().trim().min(1, "Tell us your goal").max(200),
     goalCompany: z.string().trim().max(120),
+    /** The one question this student would like a senior to answer (shown to seniors giving back). */
+    goalQuestion: z.string().trim().max(300).optional(),
     tenthRange: percentRange.nullable(),
     twelfthRange: percentRange.nullable(),
     showTenth: z.boolean(),

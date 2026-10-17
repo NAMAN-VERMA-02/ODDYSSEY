@@ -52,6 +52,7 @@ export async function saveJourney(input: unknown): Promise<JourneyActionState> {
     user_id: user.id,
     target: j.goalTarget,
     company: j.goalCompany || null,
+    open_question: j.goalQuestion || null,
   });
   if (goalError) return { message: "We could not save your goal. Please try again." };
 

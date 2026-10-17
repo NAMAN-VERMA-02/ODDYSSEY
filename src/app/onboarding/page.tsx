@@ -14,7 +14,7 @@ async function Journey() {
   if (!user) redirect("/login");
 
   const [{ data: goal }, { data: snaps }] = await Promise.all([
-    supabase.from("goals").select("target, company").eq("user_id", user.id).maybeSingle(),
+    supabase.from("goals").select("target, company, open_question").eq("user_id", user.id).maybeSingle(),
     supabase.from("snapshots").select("*").eq("user_id", user.id).order("semester"),
   ]);
 
@@ -22,6 +22,7 @@ async function Journey() {
   const initial: InitialJourney = {
     goalTarget: goal?.target ?? "",
     goalCompany: goal?.company ?? "",
+    goalQuestion: goal?.open_question ?? "",
     tenthRange: first?.tenth_range ?? "",
     twelfthRange: first?.twelfth_range ?? "",
     showTenth: first?.show_tenth ?? false,

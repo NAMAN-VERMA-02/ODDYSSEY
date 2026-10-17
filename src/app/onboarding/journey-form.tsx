@@ -26,6 +26,7 @@ type Row = {
 export type InitialJourney = {
   goalTarget: string;
   goalCompany: string;
+  goalQuestion: string;
   tenthRange: string;
   twelfthRange: string;
   showTenth: boolean;
@@ -57,6 +58,7 @@ function Label({ htmlFor, children }: { htmlFor: string; children: React.ReactNo
 export function JourneyForm({ initial }: { initial: InitialJourney }) {
   const [goalTarget, setGoalTarget] = useState(initial.goalTarget);
   const [goalCompany, setGoalCompany] = useState(initial.goalCompany);
+  const [goalQuestion, setGoalQuestion] = useState(initial.goalQuestion);
   const [tenthRange, setTenthRange] = useState(initial.tenthRange);
   const [twelfthRange, setTwelfthRange] = useState(initial.twelfthRange);
   const [showTenth, setShowTenth] = useState(initial.showTenth);
@@ -118,6 +120,7 @@ export function JourneyForm({ initial }: { initial: InitialJourney }) {
     const payload = {
       goalTarget,
       goalCompany,
+      goalQuestion,
       tenthRange: tenthRange || null,
       twelfthRange: twelfthRange || null,
       showTenth,
@@ -149,6 +152,11 @@ export function JourneyForm({ initial }: { initial: InitialJourney }) {
         <div>
           <Label htmlFor="goalCompany">Target company (optional)</Label>
           <input id="goalCompany" className={control} value={goalCompany} onChange={(e) => setGoalCompany(e.target.value)} maxLength={120} />
+        </div>
+        <div>
+          <Label htmlFor="goalQuestion">One question you would like a senior to answer (optional)</Label>
+          <input id="goalQuestion" className={control} value={goalQuestion} onChange={(e) => setGoalQuestion(e.target.value)} maxLength={300} placeholder="How did you prepare for the online test?" />
+          <p className="mt-1 text-xs text-[var(--muted)]">Seniors who have just landed a job are asked to answer one question from three juniors like you.</p>
         </div>
       </section>
 
