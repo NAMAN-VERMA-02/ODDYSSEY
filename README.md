@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KAL (कल) — ODDYSSEY
 
-## Getting Started
+A college alumni network that matches every student to the seniors who were once in the *same position* (same semester, similar CGPA, backlogs, branch, college tier, 10th/12th marks, GATE vs job), shows the routes those seniors took, and helps the student reach them directly or through one bridging senior (max 2 hops).
 
-First, run the development server:
+Trust ladder: question → 15-minute call → small task → referral unlocks. After success, pay it forward ×3.
 
+## Stack
+Next.js (App Router, TypeScript, Tailwind, mobile-first), Supabase (Postgres, auth, realtime, RLS), an LLM API (LinkedIn PDF → semester timeline, message drafts), D3 (route map).
+
+## Setup
 ```bash
+npm install
+cp .env.example .env.local   # fill in real values; never commit .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Privacy and guardrails
+- Marks are shown only as ranges, and only if the user opts in.
+- Company counts are shown only if the count is 2 or more; names never reach the server.
+- One open bridge request per student; at most 3 waiting per senior.
+- Forward links expire in 7 days; declines are silent.
+- Referral unlocks only after the senior has seen the student's work.
+- College email verification; 18+. Supabase RLS on every table.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Designed on DPDP Act 2023 principles (not "certified compliant").
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Team & Contributions
+All work is committed under NAMAN-VERMA (GitHub: NAMAN-VERMA-02), who directed every feature in this repository.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built with Claude as a coding assistant; the team designed, directed and reviewed every feature.
