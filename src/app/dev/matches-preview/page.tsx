@@ -51,7 +51,7 @@ export default function Preview() {
         Where you are, <br className="hidden sm:block" />
         where they went
       </h1>
-      <MatchResults data={fixture} />
+      <MatchResults data={fixture} demo />
     </main>
   );
 }

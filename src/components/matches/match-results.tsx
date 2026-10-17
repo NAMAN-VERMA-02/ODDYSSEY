@@ -1,5 +1,6 @@
 import type { Match, TraitKey } from "@/lib/scoring";
 import type { MatchResponse } from "@/lib/scoring/response";
+import { AskPanel } from "./ask-panel";
 import { RouteList, RouteMap, routeSentence } from "./route-map";
 
 const TRAIT_LABELS: Record<TraitKey, string> = {
@@ -12,7 +13,7 @@ const TRAIT_LABELS: Record<TraitKey, string> = {
   decision: "Same direction",
 };
 
-function MatchCard({ m }: { m: Match }) {
+function MatchCard({ m, bridgeBlocked, demo }: { m: Match; bridgeBlocked: boolean; demo?: boolean }) {
   const bridge = m.routes.find((r) => r.type === "via_senior");
   return (
     <li className="rounded-[22px] bg-white p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
@@ -48,12 +49,21 @@ function MatchCard({ m }: { m: Match }) {
           ? `Knows ${bridge.contactCount} people at ${bridge.company}. They can pass your request on.`
           : "You can ask them a question directly."}
       </p>
+
+      <AskPanel
+        matchId={m.id}
+        name={m.displayName}
+        firstLine={m.firstLine}
+        bridge={bridge && bridge.type === "via_senior" ? { company: bridge.company, contactCount: bridge.contactCount } : undefined}
+        bridgeBlocked={bridgeBlocked}
+        demo={demo}
+      />
     </li>
   );
 }
 
 /** Pure view of a match response, used by the live page and the dev preview. */
-export function MatchResults({ data }: { data: MatchResponse }) {
+export function MatchResults({ data, demo }: { data: MatchResponse; demo?: boolean }) {
   const sentence = routeSentence(data.routeMap);
 
   if (data.total === 0) {
@@ -96,7 +106,7 @@ export function MatchResults({ data }: { data: MatchResponse }) {
         </h2>
         <ul className="grid gap-4 sm:grid-cols-2">
           {data.matches.map((m) => (
-            <MatchCard key={m.id} m={m} />
+            <MatchCard key={m.id} m={m} bridgeBlocked={data.bridgeBlocked} demo={demo} />
           ))}
         </ul>
       </section>
