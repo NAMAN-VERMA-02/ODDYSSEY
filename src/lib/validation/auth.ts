@@ -27,15 +27,26 @@ export function emailMatchesCollege(email: string, domains: string[]): boolean {
 
 const email = z.string().trim().toLowerCase().email("Enter a valid email").max(254);
 
-export const signupSchema = z.object({
-  fullName: z.string().trim().min(1, "Enter your name").max(120),
-  email,
-  password: z.string().min(10, "Use at least 10 characters").max(72, "Use at most 72 characters"),
-  role: z.enum(ROLES, { error: "Choose a role" }),
-  branch: z.string().trim().min(1, "Enter your branch").max(80),
-  batch: z.coerce.number().int().min(1990, "Enter a valid batch year").max(2100, "Enter a valid batch year"),
-  dob: z.string().refine((v) => isAdult(v), `You must be ${MIN_AGE} or older to join SETU`),
-});
+const optionalText = (max: number) => z.preprocess((v) => (v === "" ? undefined : v), z.string().trim().max(max).optional());
+
+export const signupSchema = z
+  .object({
+    fullName: z.string().trim().min(1, "Enter your name").max(120),
+    email,
+    password: z.string().min(10, "Use at least 10 characters").max(72, "Use at most 72 characters"),
+    role: z.enum(ROLES, { error: "Choose a role" }).optional(),
+    branch: optionalText(80),
+    batch: z.preprocess((v) => (v === "" ? undefined : v), z.coerce.number().int().min(1990, "Enter a valid batch year").max(2100, "Enter a valid batch year").optional()),
+    dob: z.string().refine((v) => isAdult(v), `You must be ${MIN_AGE} or older to join SETU`),
+    /** A single-use invite for recruiters and founders, who do not have a college email. */
+    inviteCode: z.preprocess((v) => (v === "" ? undefined : v), z.string().trim().toLowerCase().regex(/^[a-f0-9]{12}$/, "That invite code looks wrong").optional()),
+  })
+  .superRefine((v, ctx) => {
+    if (v.inviteCode) return;
+    if (!v.role) ctx.addIssue({ code: "custom", path: ["role"], message: "Choose a role" });
+    if (!v.branch) ctx.addIssue({ code: "custom", path: ["branch"], message: "Enter your branch" });
+    if (v.batch === undefined) ctx.addIssue({ code: "custom", path: ["batch"], message: "Enter a valid batch year" });
+  });
 
 export const loginSchema = z.object({
   email,

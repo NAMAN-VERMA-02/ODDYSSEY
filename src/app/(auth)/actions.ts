@@ -14,17 +14,23 @@ export async function signup(_prev: AuthFormState, formData: FormData): Promise<
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
-  const { fullName, email, password, role, branch, batch } = parsed.data;
+  const { fullName, email, password, role, branch, batch, inviteCode } = parsed.data;
 
   const supabase = await createClient();
 
-  const { data: colleges, error: collegeError } = await supabase
-    .from("colleges")
-    .select("email_domain");
-  if (collegeError) return { message: "Something went wrong. Please try again." };
-
-  if (!emailMatchesCollege(email, (colleges ?? []).map((c) => c.email_domain))) {
-    return { errors: { email: ["Use your college email address to join SETU"] } };
+  let signupRole = role;
+  if (inviteCode) {
+    // An invite stands in for a college email. It must be live, and it decides the role.
+    const { data: invite } = await supabase.rpc("check_invite", { p_code: inviteCode });
+    const found = invite?.[0] as { role: string } | undefined;
+    if (!found) return { message: "This invite is not valid or has expired. Ask the person who sent it for a new one." };
+    signupRole = found.role as typeof role;
+  } else {
+    const { data: colleges, error: collegeError } = await supabase.from("colleges").select("email_domain");
+    if (collegeError) return { message: "Something went wrong. Please try again." };
+    if (!emailMatchesCollege(email, (colleges ?? []).map((c) => c.email_domain))) {
+      return { errors: { email: ["Use your college email address to join SETU"] } };
+    }
   }
 
   const { error } = await supabase.auth.signUp({
@@ -33,7 +39,14 @@ export async function signup(_prev: AuthFormState, formData: FormData): Promise<
     options: {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
       // The date of birth is checked here and discarded; only the 18+ confirmation is kept.
-      data: { full_name: fullName, role, branch, batch, age_confirmed: true },
+      data: {
+        full_name: fullName,
+        role: signupRole,
+        branch: branch ?? "",
+        batch: batch ?? null,
+        age_confirmed: true,
+        ...(inviteCode ? { invite_code: inviteCode } : {}),
+      },
     },
   });
   if (error) return { message: "We could not create your account. Please try again." };

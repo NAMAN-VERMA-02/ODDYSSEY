@@ -24,6 +24,31 @@ describe("nextStep", () => {
   });
 });
 
+describe("nextStep for other roles and the network", () => {
+  const rec: DashboardState = { ...base, role: "recruiter", semesters: 0 };
+  it("does not ask recruiters, founders or faculty for a journey", () => {
+    expect(nextStep(rec).href).not.toBe("/onboarding");
+  });
+  it("sends a poster with no posts to the post form, and points at interest in their posts", () => {
+    expect(nextStep({ ...rec, myPosts: 0 }).href).toBe("/opportunities/new");
+    expect(nextStep({ ...rec, myPosts: 2, interestsOnMine: 3, profilePercent: 100 }).href).toBe("/opportunities/mine");
+  });
+  it("puts connection requests ahead of the generic suggestions", () => {
+    expect(nextStep({ ...base, sent: 1, climbed: true, incomingConnections: 2 }).href).toBe("/network");
+  });
+  it("asks for a fuller profile before the generic flow", () => {
+    expect(nextStep({ ...base, sent: 1, climbed: true, profilePercent: 20 }).href).toBe("/profile");
+  });
+  it("suggests growing the network when nothing else is pending", () => {
+    expect(nextStep({ ...rec, myPosts: 1, profilePercent: 100, connections: 1 }).href).toBe("/people");
+  });
+  it("gives non-students their own checklist", () => {
+    const items = checklist({ ...rec, myPosts: 1, profilePercent: 90, connections: 4 });
+    expect(items.map((i) => i.label)).toEqual(["Complete your profile", "Connect with three people", "Post an opportunity"]);
+    expect(items.every((i) => i.done)).toBe(true);
+  });
+});
+
 describe("checklist", () => {
   it("ticks off steps as they happen", () => {
     const items = checklist({ ...base, sent: 1, climbed: true });

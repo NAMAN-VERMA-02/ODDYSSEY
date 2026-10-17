@@ -1,16 +1,31 @@
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
 
-const LINKS = [
-  { href: "/matches", label: "Matches" },
-  { href: "/requests", label: "Requests" },
-  { href: "/payitforward", label: "Pay it forward" },
-  { href: "/onboarding", label: "My journey" },
-];
+type NavLink = { href: string; label: string };
+
+/** Everyone gets the network pages; roles add the tools that belong to them. */
+function linksFor(role: string): NavLink[] {
+  const base: NavLink[] = [
+    { href: "/people", label: "People" },
+    { href: "/opportunities", label: "Opportunities" },
+    { href: "/network", label: "Network" },
+  ];
+  const own: NavLink[] =
+    role === "student"
+      ? [{ href: "/matches", label: "Matches" }, { href: "/requests", label: "Requests" }]
+      : role === "alumni"
+        ? [{ href: "/requests", label: "Requests" }, { href: "/invites", label: "Invites" }]
+        : role === "placement"
+          ? [{ href: "/college", label: "College" }, { href: "/invites", label: "Invites" }]
+          : role === "faculty"
+            ? [{ href: "/invites", label: "Invites" }]
+            : [];
+  return [...base, ...own, { href: "/profile", label: "Profile" }];
+}
 
 /** Floating white header card shared by signed-in pages. */
-export function AppHeader({ isPlacement = false }: { isPlacement?: boolean }) {
-  const links = isPlacement ? [{ href: "/college", label: "College" }, ...LINKS] : LINKS;
+export function AppHeader({ role = "student" }: { role?: string }) {
+  const links = linksFor(role);
 
   return (
     <header className="header-drop sticky top-0 z-10 mx-auto w-full max-w-6xl px-3 sm:px-6">

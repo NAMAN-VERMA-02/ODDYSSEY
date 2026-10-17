@@ -35,3 +35,20 @@ describe("signupSchema", () => {
     expect(r.success).toBe(false);
   });
 });
+
+describe("signupSchema with an invite", () => {
+  const base = { fullName: "R", email: "hr@acme.com", password: "longenough1", dob: "1995-01-01" };
+  it("does not need a role, branch or batch when an invite is used", () => {
+    expect(signupSchema.safeParse({ ...base, inviteCode: "abcdef012345" }).success).toBe(true);
+  });
+  it("needs them without an invite", () => {
+    const r = signupSchema.safeParse(base);
+    expect(r.success).toBe(false);
+  });
+  it("rejects a malformed invite code and normalises case", () => {
+    expect(signupSchema.safeParse({ ...base, inviteCode: "nope" }).success).toBe(false);
+    const ok = signupSchema.safeParse({ ...base, inviteCode: "ABCDEF012345" });
+    expect(ok.success && ok.data.inviteCode).toBe("abcdef012345");
+  });
+});
+

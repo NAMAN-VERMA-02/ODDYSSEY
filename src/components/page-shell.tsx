@@ -22,7 +22,7 @@ async function Inner({ eyebrow, title, lede, children }: Props) {
 
   return (
     <>
-      <AppHeader isPlacement={profile?.role === "placement"} />
+      <AppHeader role={profile?.role ?? "student"} />
       <main className="mx-auto w-full max-w-6xl px-4 pb-20 pt-10 sm:px-6 sm:pt-14">
         <Hero eyebrow={eyebrow} lines={title} lede={lede} />
         <div className="rise" style={{ "--d": "0.7s" } as React.CSSProperties}>

@@ -57,6 +57,48 @@ function Tile({
   );
 }
 
+type TileSpec = { href: string; tone: string; dark?: boolean; label: string; big: React.ReactNode; sub: string };
+
+/** The shortcuts shown for each kind of person. */
+function tilesFor(data: DashboardData): TileSpec[] {
+  const st = data.state;
+  const opps: TileSpec = { href: "/opportunities", tone: "var(--yellow)", label: "Opportunities", big: <CountUp to={st.openOpps ?? 0} />, sub: "open to your college, ranked for you" };
+  const people: TileSpec = { href: "/people", tone: "var(--sage)", label: "People", big: <CountUp to={st.people ?? 0} />, sub: "to find by what they know and offer" };
+  const network: TileSpec = { href: "/network", tone: "var(--stone)", label: "Network", big: <CountUp to={st.connections ?? 0} />, sub: `connections${st.incomingConnections ? ` · ${st.incomingConnections} waiting` : ""}` };
+  const profile: TileSpec = { href: "/profile", tone: "#fff", label: "Your profile", big: `${st.profilePercent ?? 0}%`, sub: "complete · be easy to find" };
+  const requests: TileSpec = { href: "/requests", tone: "var(--yellow)", label: "Requests", big: <CountUp to={st.waitingOnMe} />, sub: `waiting on you · ${st.sent} sent by you` };
+  const payForward: TileSpec = {
+    href: "/payitforward",
+    tone: "var(--red-tile)",
+    label: "Pay it forward",
+    big: st.succeeded && st.helpOwed > 0 ? <CountUp to={st.helpOwed} /> : "×3",
+    sub: st.succeeded && st.helpOwed > 0 ? "answers left to give" : `${data.answersReceived} answers received so far`,
+  };
+  const posts: TileSpec = { href: "/opportunities/mine", tone: "var(--red-tile)", label: "My posts", big: <CountUp to={st.myPosts ?? 0} />, sub: `open · ${st.interestsOnMine ?? 0} interested` };
+
+  switch (data.role) {
+    case "student":
+      return [
+        { href: "/matches", tone: "var(--blue)", label: "Your matches", big: "Meet", sub: "Seniors who were exactly where you are" },
+        opps, people, network, requests, payForward, profile,
+        { href: "/onboarding", tone: "#fff", label: "Your journey", big: <CountUp to={st.semesters} />, sub: "semesters shared · edit any time" },
+      ];
+    case "alumni":
+      return [people, opps, network, requests, posts, payForward, profile, { href: "/invites", tone: "var(--blue)", label: "Invites", big: "Vouch", sub: "bring in recruiters and founders" }];
+    case "placement":
+      return [
+        { href: "/college", tone: "var(--ink)", dark: true, label: "College", big: "Stats", sub: "Engagement and outcomes at a glance" },
+        { href: "/invites", tone: "var(--blue)", label: "Invites", big: "Vouch", sub: "bring in recruiters and founders" },
+        opps, people, network, profile,
+      ];
+    case "faculty":
+      return [posts, people, opps, network, profile, { href: "/invites", tone: "var(--blue)", label: "Invites", big: "Vouch", sub: "bring in recruiters and founders" }];
+    default:
+      // founders and recruiters
+      return [posts, people, opps, network, profile];
+  }
+}
+
 const HOW = [
   { n: "01", title: "Match on the “then”", text: "SETU compares you with seniors’ snapshots from the exact semester you are in, not where they work today." },
   { n: "02", title: "Reach them through someone they trust", text: "If a senior knows people at your target company, they can pass your question on. Never more than one bridge." },
@@ -69,12 +111,12 @@ export function DashboardView({ data }: { data: DashboardData }) {
   const next = nextStep(state);
   const steps = checklist(state);
   const doneCount = steps.filter((s) => s.done).length;
-  const isPlacement = data.role === "placement";
   const first = firstName(data.fullName);
+  const tiles = tilesFor(data);
 
   return (
     <>
-      <AppHeader isPlacement={isPlacement} />
+      <AppHeader role={data.role} />
 
       <main className="mx-auto w-full max-w-6xl px-4 pb-20 pt-10 sm:px-6 sm:pt-14">
         {/* Hero */}
@@ -125,28 +167,9 @@ export function DashboardView({ data }: { data: DashboardData }) {
 
         {/* Tiles */}
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Where to go">
-          <Tile href="/matches" tone="var(--blue)" label="Your matches" big="Meet" sub="Seniors who were exactly where you are" delay="0.9s" />
-          <Tile
-            href="/requests"
-            tone="var(--yellow)"
-            label="Requests"
-            big={<CountUp to={state.waitingOnMe} />}
-            sub={`waiting on you · ${state.sent} sent by you`}
-            delay="1s"
-          />
-          <Tile
-            href="/payitforward"
-            tone="var(--red-tile)"
-            label="Pay it forward"
-            big={state.succeeded && state.helpOwed > 0 ? <CountUp to={state.helpOwed} /> : "×3"}
-            sub={state.succeeded && state.helpOwed > 0 ? "answers left to give" : `${data.answersReceived} answers received so far`}
-            delay="1.1s"
-          />
-          {isPlacement ? (
-            <Tile href="/college" tone="var(--ink)" dark label="College" big="Stats" sub="Engagement and outcomes at a glance" delay="1.2s" />
-          ) : (
-            <Tile href="/onboarding" tone="#fff" label="Your journey" big={<CountUp to={state.semesters} />} sub="semesters shared · edit any time" delay="1.2s" />
-          )}
+          {tiles.map((t, i) => (
+            <Tile key={t.href} {...t} delay={`${0.9 + i * 0.07}s`} />
+          ))}
         </ul>
 
         {/* Path + how it works */}
