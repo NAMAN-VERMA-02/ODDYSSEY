@@ -17,6 +17,11 @@ npm run dev
 ## Demo data
 `supabase/seed/sample_journeys.sql` loads 150 synthetic journeys (about 1,180 semester snapshots, goals and company counts) for the demo college. They use the reserved `@seed.invalid` domain, so they can never log in or receive mail, and names carry a "(sample)" suffix. The script is deterministic and safe to re-run. Remove it with `delete from auth.users where email like '%@seed.invalid';`.
 
+Outcomes for the demo (placements, open questions, requests, pay-it-forward answers and a sample placement-cell account) come from `supabase/seed/sample_outcomes.sql`, run after the journeys.
+
+To see the college dashboard, switch your own account to the placement role in the Supabase SQL editor (the app itself cannot change roles):
+`update public.users set role = 'placement' where id = '<your user id>';`
+
 To try `/api/match` end to end, add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local`, sign up with a `@kiet.edu` address (batch 2028 or later), fill in your journey, then open `/api/match`.
 
 ## Privacy and guardrails
