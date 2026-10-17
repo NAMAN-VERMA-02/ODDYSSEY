@@ -46,6 +46,10 @@ begin
   update public.users u set help_owed = 3
    where u.succeeded_at is not null and u.batch = 2025
      and exists (select 1 from auth.users a where a.id = u.id and a.email like 'sample%@seed.invalid');
+  -- Only people who reported a success owe answers.
+  update public.users u set help_owed = 0
+   where u.succeeded_at is null
+     and exists (select 1 from auth.users a where a.id = u.id and a.email like 'sample%@seed.invalid');
   update public.users u set help_owed = 0
    where u.succeeded_at is not null and u.batch <> 2025
      and exists (select 1 from auth.users a where a.id = u.id and a.email like 'sample%@seed.invalid');
