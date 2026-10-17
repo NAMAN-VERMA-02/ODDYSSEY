@@ -53,7 +53,7 @@ export function Preview() {
       <PayForwardBoard data={data} handlers={handlers} />
       <h1 className="text-5xl font-black uppercase leading-none tracking-tight sm:text-7xl">
         Your college
-        <br className="hidden sm:block" /> on KAL
+        <br className="hidden sm:block" /> on SETU
       </h1>
       <CollegeDashboard stats={stats} />
     </main>

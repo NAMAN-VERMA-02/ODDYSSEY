@@ -54,7 +54,7 @@ export default function OnboardingPage() {
       title={["Your", "_journey_"]}
       lede={
         <>
-          Share where you are, semester by semester. KAL uses it to find seniors who stood exactly here.{" "}
+          Share where you are, semester by semester. SETU uses it to find seniors who stood exactly here.{" "}
           <Link href="/dashboard" className="underline">
             Skip for now
           </Link>

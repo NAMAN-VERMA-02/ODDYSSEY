@@ -25,7 +25,7 @@ export function CollegeDashboard({ stats }: { stats: CollegeStats }) {
   return (
     <div className="space-y-10">
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Headline figures">
-        <Tile label="Students on KAL" value={String(stats.students)} sub={`${pct(stats.journeys_shared, stats.students)}% have shared their journey`} tone="white" />
+        <Tile label="Students on SETU" value={String(stats.students)} sub={`${pct(stats.journeys_shared, stats.students)}% have shared their journey`} tone="white" />
         <Tile label="Got a first reply" value={`${pct(stats.students_replied, stats.students_asked)}%`} sub={`${stats.students_replied} of ${stats.students_asked} students who asked`} tone="var(--blue)" />
         <Tile label="Landed a role" value={String(stats.placed)} sub="members who shared a success" tone="var(--yellow)" />
         <Tile label="Paid forward" value={String(stats.helps)} sub={`answers from ${stats.helpers} seniors · ${stats.help_owed_open} still owed`} tone="var(--sage)" />
@@ -74,7 +74,7 @@ export function CollegeDashboard({ stats }: { stats: CollegeStats }) {
         </section>
 
         <section aria-labelledby="mem-h" className="reveal rounded-[22px] bg-white p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
-          <h2 id="mem-h" className="text-xl font-black uppercase tracking-tight">Who is on KAL</h2>
+          <h2 id="mem-h" className="text-xl font-black uppercase tracking-tight">Who is on SETU</h2>
           <ul className="mt-3 divide-y divide-[var(--ink)]/10">
             {roles.map(([role, n]) => (
               <li key={role} className="flex justify-between py-2 text-sm">

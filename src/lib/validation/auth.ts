@@ -34,7 +34,7 @@ export const signupSchema = z.object({
   role: z.enum(ROLES, { error: "Choose a role" }),
   branch: z.string().trim().min(1, "Enter your branch").max(80),
   batch: z.coerce.number().int().min(1990, "Enter a valid batch year").max(2100, "Enter a valid batch year"),
-  dob: z.string().refine((v) => isAdult(v), `You must be ${MIN_AGE} or older to join KAL`),
+  dob: z.string().refine((v) => isAdult(v), `You must be ${MIN_AGE} or older to join SETU`),
 });
 
 export const loginSchema = z.object({

@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <PageShell
       eyebrow="For the placement cell"
-      title={["Your college", "on KAL"]}
+      title={["Your college", "on SETU"]}
       lede="Engagement, how far requests climb the trust ladder, placements and help paid forward. Counts only."
     >
       <CollegeDashboard

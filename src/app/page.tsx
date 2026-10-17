@@ -4,7 +4,7 @@ import { PublicHeader } from "@/components/public-header";
 import { SiteFooter } from "@/components/site-footer";
 
 const STEPS = [
-  { n: "01", tone: "var(--blue)", title: "Match on the “then”", text: "Other platforms show where seniors are today. KAL compares you with what they were in your exact semester: marks, backlogs, branch and direction." },
+  { n: "01", tone: "var(--blue)", title: "Match on the “then”", text: "Other platforms show where seniors are today. SETU compares you with what they were in your exact semester: marks, backlogs, branch and direction." },
   { n: "02", tone: "var(--yellow)", title: "Reach them through someone they trust", text: "If nobody you can ask is at your target company, a senior who knows people there can pass your question on. Never more than one bridge." },
   { n: "03", tone: "var(--red-tile)", title: "Pay it forward ×3", text: "When you land your role, answer three juniors who stand where you once stood. The network grows itself." },
 ];
@@ -25,19 +25,19 @@ export default function Home() {
           eyebrow="Your college’s own alumni network"
           lines={["Their yesterday", "is your", "_tomorrow._"]}
           size="clamp(3rem, 11vw, 9.5rem)"
-          lede="KAL matches you to the seniors who were once exactly where you are now, shows the routes they took, and helps you reach them through people they trust."
+          lede="SETU matches you to the seniors who were once exactly where you are now, shows the routes they took, and helps you reach them through people they trust."
         />
 
         <div className="rise -mt-4 mb-16 flex flex-wrap gap-3" style={{ "--d": "1s" } as React.CSSProperties}>
           <Link href="/signup" data-magnetic className="rounded-full bg-[var(--ink)] px-8 py-3.5 text-base font-bold text-white transition-transform hover:-translate-y-1">
-            Join KAL →
+            Join SETU →
           </Link>
           <Link href="/login" data-magnetic className="rounded-full border border-[var(--ink)] px-8 py-3.5 text-base font-bold transition-transform hover:-translate-y-1">
             Log in
           </Link>
         </div>
 
-        <ul className="grid gap-4 md:grid-cols-3" aria-label="How KAL works">
+        <ul className="grid gap-4 md:grid-cols-3" aria-label="How SETU works">
           {STEPS.map((s, i) => (
             <li key={s.n} className="reveal tile rounded-[22px] p-6" style={{ background: s.tone, "--d": `${i * 0.12}s` } as React.CSSProperties}>
               <p className="text-5xl font-black leading-none opacity-30">{s.n}</p>

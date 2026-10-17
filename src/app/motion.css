@@ -171,7 +171,7 @@ html[data-seen] .preloader {
 }
 
 .preloader-word {
-  font-size: clamp(8rem, 50vw, 44rem);
+  font-size: clamp(6rem, 36vw, 32rem);
   font-weight: 900;
   line-height: 0.78;
   letter-spacing: -0.06em;
@@ -263,7 +263,7 @@ html[data-seen] .preloader {
 .footer-word {
   margin: 1.5rem 0 -0.1em;
   text-align: center;
-  font-size: clamp(8rem, 34vw, 30rem);
+  font-size: clamp(6rem, 27vw, 24rem);
   font-weight: 900;
   line-height: 0.74;
   letter-spacing: -0.06em;

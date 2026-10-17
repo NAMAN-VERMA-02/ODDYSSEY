@@ -15,9 +15,9 @@ export function AppHeader({ isPlacement = false }: { isPlacement?: boolean }) {
   return (
     <header className="header-drop sticky top-0 z-10 mx-auto w-full max-w-6xl px-3 sm:px-6">
       <div className="flex items-center justify-between gap-4 rounded-b-[22px] bg-white px-4 py-3 shadow-[0_0_0_1px_rgba(15,15,14,.08),0_16px_36px_-24px_rgba(15,15,14,.3)] sm:px-6">
-        <Link href="/dashboard" className="flex items-baseline gap-2 font-black uppercase leading-none tracking-tight" aria-label="KAL home">
-          <span className="text-3xl">KAL</span>
-          <span className="text-sm font-medium normal-case text-[var(--muted)]">कल</span>
+        <Link href="/dashboard" className="flex items-baseline gap-2 font-black uppercase leading-none tracking-tight" aria-label="SETU home">
+          <span className="text-3xl">SETU</span>
+          <span className="text-sm font-medium normal-case text-[var(--muted)]">सेतु</span>
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">

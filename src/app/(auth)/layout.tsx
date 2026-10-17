@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <>
       <PublicHeader />
       <main className="mx-auto grid w-full max-w-6xl gap-10 px-4 pb-20 pt-10 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-16 lg:pt-16">
-        <section aria-label="About KAL" className="hidden lg:block">
+        <section aria-label="About SETU" className="hidden lg:block">
           <p className="rise mb-5 inline-block rounded-full bg-white px-3 py-1 text-sm font-semibold shadow-[0_0_0_1px_rgba(15,15,14,.08)]" style={{ "--d": "0.15s" } as React.CSSProperties}>
             Your college’s own network
           </p>

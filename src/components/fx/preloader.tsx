@@ -19,12 +19,12 @@ export function Preloader() {
   return (
     <div className="preloader" aria-hidden="true">
       <p className="preloader-word">
-        <span className="block">KAL</span>
+        <span className="block">SETU</span>
       </p>
       <div className="preloader-meta">
         <span className="preloader-count" />
         <span className="hidden sm:inline">Their yesterday is your tomorrow</span>
-        <span>कल</span>
+        <span>सेतु</span>
       </div>
     </div>
   );

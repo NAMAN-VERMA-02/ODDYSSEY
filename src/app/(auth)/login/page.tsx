@@ -37,7 +37,7 @@ export default function LoginPage({
       <p className="mt-6 text-sm">
         New here?{" "}
         <Link href="/signup" className="font-semibold underline">
-          Join KAL
+          Join SETU
         </Link>
       </p>
     </>

@@ -35,7 +35,7 @@ export function ForwardLink({
       <p className="text-sm font-semibold">Send this to the person you have in mind</p>
       <p className="text-sm">
         Share it from your own phone. They can read the request and reply in one tap without signing up. You choose who
-        gets it, and KAL never learns who that is unless they reply.
+        gets it, and SETU never learns who that is unless they reply.
       </p>
 
       <input

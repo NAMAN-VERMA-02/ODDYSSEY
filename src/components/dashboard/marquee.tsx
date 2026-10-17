@@ -1,4 +1,4 @@
-const WORDS = ["Their yesterday is your tomorrow", "Past-self matching", "Ask through someone they trust", "Pay it forward ×3", "कल"];
+const WORDS = ["Their yesterday is your tomorrow", "Past-self matching", "Ask through someone they trust", "Pay it forward ×3", "सेतु"];
 
 /** Slow looping ticker. Decorative, so it is hidden from screen readers. */
 export function Marquee() {

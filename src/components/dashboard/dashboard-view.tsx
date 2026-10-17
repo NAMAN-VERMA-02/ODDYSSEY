@@ -58,7 +58,7 @@ function Tile({
 }
 
 const HOW = [
-  { n: "01", title: "Match on the “then”", text: "KAL compares you with seniors’ snapshots from the exact semester you are in, not where they work today." },
+  { n: "01", title: "Match on the “then”", text: "SETU compares you with seniors’ snapshots from the exact semester you are in, not where they work today." },
   { n: "02", title: "Reach them through someone they trust", text: "If a senior knows people at your target company, they can pass your question on. Never more than one bridge." },
   { n: "03", title: "Earn trust, step by step", text: "A question, then a call, then a small task. A referral unlocks only after they have seen your work." },
 ];
@@ -182,7 +182,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
 
           <section aria-labelledby="how-h" className="reveal" style={{ "--d": "0.12s" } as React.CSSProperties}>
             <h2 id="how-h" className="text-3xl font-black uppercase leading-none tracking-tight">
-              How KAL works
+              How SETU works
             </h2>
             <ul className="mt-5 divide-y divide-[var(--ink)]/10">
               {HOW.map((h) => (

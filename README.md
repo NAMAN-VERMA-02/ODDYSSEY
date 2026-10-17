@@ -1,21 +1,21 @@
-# KAL (कल)
+# SETU (सेतु), the bridge
 
-**Their yesterday is your tomorrow.** KAL is a college's own alumni network that matches each student to the seniors who were once in *exactly* their position, shows the routes those seniors took, and helps the student reach them directly or through one bridging senior they trust.
+**Their yesterday is your tomorrow.** SETU is a college's own alumni network that matches each student to the seniors who were once in *exactly* their position, shows the routes those seniors took, and helps the student reach them directly or through one bridging senior they trust.
 
-Alumni platforms show where seniors are today. A student from a tier-2 or tier-3 college needs a route, and only someone who once stood where that student stands can show one. KAL matches on the "then", not the "now". To our knowledge, no alumni platform matches a student to a senior's past stage.
+Alumni platforms show where seniors are today. A student from a tier-2 or tier-3 college needs a route, and only someone who once stood where that student stands can show one. SETU matches on the "then", not the "now". To our knowledge, no alumni platform matches a student to a senior's past stage.
 
 Repository: `ODDYSSEY` · Built for a hackathon.
 
 ## What it does
 
-| Idea | How KAL does it |
+| Idea | How SETU does it |
 |---|---|
 | **Past-self matching** | Compares a student with every senior's snapshot from the *same semester*: college tier 20, CGPA within 0.5 → 20, branch 15, backlogs 15, 10th within 5% → 10, 12th within 5% → 10, same direction 10. A rarity bonus rewards uncommon shared traits; the rarest one becomes the first line of the message. |
 | **Route map** | A branching D3 map of what the matched seniors did next (job, GATE, startup…) and where they landed. Counts only. |
 | **Introductions through a senior** | If a matched senior knows people at the student's target company (a count, never names), the student can ask that senior to pass the question on. Never more than 2 hops. The senior forwards a one-time link from their own phone; the recipient replies in one tap with no sign-up. |
 | **Trust ladder** | A question → a 15-minute call → a small task → a referral. A referral unlocks only after the senior has seen the student's work. |
-| **Pay it forward ×3** | When someone lands a role, KAL shows three juniors whose "today" matches their "yesterday" and asks for one answer each. |
-| **College dashboard** | For the placement cell: students on KAL, first-reply rate, how far requests climb the ladder, placements, and help paid forward. |
+| **Pay it forward ×3** | When someone lands a role, SETU shows three juniors whose "today" matches their "yesterday" and asks for one answer each. |
+| **College dashboard** | For the placement cell: students on SETU, first-reply rate, how far requests climb the ladder, placements, and help paid forward. |
 | **Draft-writing agent** | An LLM agent reads the student's journey and matches and drafts first messages. The student edits and sends them. See [docs/agent.md](docs/agent.md). |
 | **LinkedIn PDF import** | The student's own "Save to PDF" is read once by an LLM into a semester-by-semester draft. The file is never stored. |
 
@@ -104,7 +104,7 @@ Sample accounts use the reserved `@seed.invalid` domain and a "(sample)" name su
 - College email verification; users must be 18 or older. The date of birth is checked once and not stored.
 - Row Level Security is enabled on every table. Server-side functions that must see across users are narrow and documented in the migrations.
 - Matching and similar features read other people's rows with the service role on the server and return only sanitised results.
-- No scraping, no contact access, no one is contacted unless they are on KAL or a senior chooses to share a link.
+- No scraping, no contact access, no one is contacted unless they are on SETU or a senior chooses to share a link.
 
 Designed on the principles of India's DPDP Act 2023 (data minimisation, separate purposes, deletion on request). We do not claim certification.
 
@@ -124,7 +124,7 @@ Not built yet, and not claimed:
 - The cinematic landing, editorial grid and footer styles described in [docs/design.md](docs/design.md); the current screens use the editorial palette only.
 - Shared rate limiting beyond the agent (the PDF import limit is per server instance).
 
-What KAL does **not** claim: that it guarantees a referral or a job (it opens the route; the senior decides), that it knows who works where (it knows counts that consenting seniors shared), chains longer than 2 hops, or that the referral advantage figure is an Indian one.
+What SETU does **not** claim: that it guarantees a referral or a job (it opens the route; the senior decides), that it knows who works where (it knows counts that consenting seniors shared), chains longer than 2 hops, or that the referral advantage figure is an Indian one.
 
 ## Team & Contributions
 

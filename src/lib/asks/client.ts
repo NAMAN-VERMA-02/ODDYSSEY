@@ -8,7 +8,7 @@ async function readJson(res: Response): Promise<Record<string, unknown>> {
   }
 }
 
-const NETWORK_ERROR = "Could not reach KAL. Check your connection and try again.";
+const NETWORK_ERROR = "Could not reach SETU. Check your connection and try again.";
 
 export async function loadAsks(): Promise<{ data?: AsksResponse; error?: string }> {
   try {

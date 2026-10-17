@@ -26,7 +26,7 @@ const serif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "KAL — their yesterday is your tomorrow",
+  title: "SETU — their yesterday is your tomorrow",
   description: "A college alumni network that matches you to seniors who were once where you are.",
 };
 

@@ -14,14 +14,14 @@ export function SiteFooter() {
             <LiveClock />
           </p>
           <p className="max-w-sm text-sm text-[var(--muted)]">
-            KAL, your college’s own network. Marks are shown only as ranges, and only if you switch them on.
+            SETU, your college’s own network. Marks are shown only as ranges, and only if you switch them on.
           </p>
           <a href="#top" data-magnetic className="inline-block rounded-full border border-[var(--ink)] px-5 py-2 font-mono text-xs font-bold uppercase tracking-wide">
             Back to top ↑
           </a>
         </div>
         <p className="footer-word reveal" aria-hidden="true">
-          KAL
+          SETU
         </p>
       </footer>
     </>

@@ -3,12 +3,12 @@ import { ROLES } from "@/lib/validation/auth";
 import { signup } from "../actions";
 import { AuthForm, Field, SelectField } from "../form";
 
-export const metadata = { title: "Join KAL" };
+export const metadata = { title: "Join SETU" };
 
 export default function SignupPage() {
   return (
     <>
-      <h1 className="text-4xl font-black uppercase leading-none tracking-tight sm:text-5xl">Join KAL</h1>
+      <h1 className="text-4xl font-black uppercase leading-none tracking-tight sm:text-5xl">Join SETU</h1>
       <p className="mb-6 mt-2 text-[var(--muted)]">Use your college email. You must be 18 or older.</p>
 
       <AuthForm action={signup} submitLabel="Create account">

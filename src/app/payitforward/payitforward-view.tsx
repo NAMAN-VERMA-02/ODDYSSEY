@@ -9,7 +9,7 @@ type State =
   | { status: "error"; message: string }
   | { status: "ok"; data: PayItForwardResponse };
 
-const NETWORK = "Could not reach KAL. Check your connection and try again.";
+const NETWORK = "Could not reach SETU. Check your connection and try again.";
 
 async function post(url: string, body: Record<string, unknown>): Promise<Result> {
   try {

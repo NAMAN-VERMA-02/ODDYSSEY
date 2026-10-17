@@ -19,7 +19,7 @@ async function Stats() {
   if (error || !data) {
     return (
       <p className="rounded-[22px] bg-white p-6">
-        This page is for your college&apos;s placement cell. If you should have access, ask KAL to switch your
+        This page is for your college&apos;s placement cell. If you should have access, ask SETU to switch your
         account to the placement role.
       </p>
     );
@@ -31,7 +31,7 @@ export default function CollegePage() {
   return (
     <PageShell
       eyebrow="For the placement cell"
-      title={["Your college", "_on KAL_"]}
+      title={["Your college", "_on SETU_"]}
       lede="Engagement, how far requests climb the trust ladder, placements and help paid forward. Counts only."
     >
       <Suspense>

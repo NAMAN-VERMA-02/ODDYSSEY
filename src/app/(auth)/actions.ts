@@ -24,7 +24,7 @@ export async function signup(_prev: AuthFormState, formData: FormData): Promise<
   if (collegeError) return { message: "Something went wrong. Please try again." };
 
   if (!emailMatchesCollege(email, (colleges ?? []).map((c) => c.email_domain))) {
-    return { errors: { email: ["Use your college email address to join KAL"] } };
+    return { errors: { email: ["Use your college email address to join SETU"] } };
   }
 
   const { error } = await supabase.auth.signUp({
@@ -54,10 +54,10 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
     if (/not confirmed/i.test(error.message)) {
       return { message: "Confirm your college email first — check your inbox for the link." };
     }
-    // KAL only has college accounts: say so when the address could never have one.
+    // SETU only has college accounts: say so when the address could never have one.
     const { data: colleges } = await supabase.from("colleges").select("email_domain");
     if (!emailMatchesCollege(parsed.data.email, (colleges ?? []).map((c) => c.email_domain))) {
-      return { message: "KAL is for college emails. Log in with your college address, or join with it." };
+      return { message: "SETU is for college emails. Log in with your college address, or join with it." };
     }
     return { message: "Invalid email or password." };
   }

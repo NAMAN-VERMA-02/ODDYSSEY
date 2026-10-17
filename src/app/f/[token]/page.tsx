@@ -35,7 +35,7 @@ async function Request({ params }: { params: Promise<{ token: string }> }) {
           you can share your own journey with students in your position.
         </p>
         <Link href="/signup" className="rounded-full bg-[var(--ink)] px-6 py-3 font-semibold text-white">
-          Join KAL
+          Join SETU
         </Link>
       </>
     );
