@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const SIGNED_OUT_ONLY = ["/login", "/signup"];
-const SIGNED_IN_ONLY = ["/dashboard"];
+const SIGNED_IN_ONLY = ["/dashboard", "/onboarding"];
 
 const matches = (path: string, prefixes: string[]) =>
   prefixes.some((p) => path === p || path.startsWith(`${p}/`));

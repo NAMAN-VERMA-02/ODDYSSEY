@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "../(auth)/actions";
@@ -27,6 +28,9 @@ async function Profile() {
       <p className="mb-8 text-[var(--muted)] capitalize">
         {profile.role} · {profile.branch} · batch {profile.batch}
         {profile.college_email_verified ? " · college email verified" : ""}
+      </p>
+      <p className="mb-6">
+        <Link href="/onboarding" className="underline">Edit your journey</Link>
       </p>
       <form action={signOut}>
         <button type="submit" className="rounded-full border border-[var(--ink)] px-6 py-2 font-semibold">
