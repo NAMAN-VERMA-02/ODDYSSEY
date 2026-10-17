@@ -6,6 +6,17 @@ Alumni platforms show where seniors are today. A student from a tier-2 or tier-3
 
 Repository: `ODDYSSEY` · Built for a hackathon.
 
+## Round 2: federated SETU (Live Network)
+
+Round 1 asked: *why would colleges give you their people's data?* They don't have to. SETU is now federated, built like India's Account Aggregator: each college runs a **Setu Node** on its own server (its people, names, CGPA, timelines, messages), and the **Setu Hub** only routes pseudonymous IDs, public job cards, edge probabilities, consent events and Points/Karz. Names and messages go from a college's server straight to the browser of someone who said yes. A college can disconnect from its own admin page, and its people vanish from SETU because SETU never held them.
+
+- **What's new:** `node/` (Python college server with Mirror, consent rules, admin console and an MCP server), `/live` (hub screens: Mirror, Bridge with the route graph and best-path maths, live intro chain, leaderboard, placement dashboard, privacy proof, Ask Setu over MCP), `/join` (30-second profile for a phone), `/h/[token]` (one-tap yes or no on a hop), `/stage` (presenter control). The campus app above is untouched.
+- **Links:** hub `/live` · presenter `/stage?key=…` · each college's `/health` and `/admin` · MCP at each college's `/mcp`.
+- **Run a node locally:** `cd node && python -m venv .venv && .venv/Scripts/python -m pip install -r requirements.txt && COLLEGE_ID=ngit uvicorn app:app --port 8001` (and `COLLEGE_ID=rce DB_PATH=./rce.db uvicorn app:app --port 8002`). Tests: `.venv/Scripts/python -m pytest`.
+- **Secrets and env:** `node scripts/gen-env.mjs <hub-url> <ngit-url> <rce-url>` writes git-ignored env files for Vercel and both Render services. See `.env.example`.
+- **Docs:** [architecture](docs/round2/ARCHITECTURE.md), [demo script](docs/round2/DEMO_SCRIPT.md), [runbook](docs/round2/RUNBOOK.md), [judge Q&A](docs/round2/QA.md), [decisions](docs/round2/DECISIONS.md), [rehearsal log](docs/round2/REHEARSAL.md).
+- **Team & Contributions:** Round 2 federation work committed by NAMAN-VERMA-02.
+
 ## What it does
 
 | Idea | How SETU does it |

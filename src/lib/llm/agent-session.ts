@@ -12,6 +12,8 @@ export type AgentTurn = {
   stop: "tool_use" | "end" | "refusal" | "max_tokens";
   calls: ToolCall[];
   usage: { input: number; output: number };
+  /** The model's own words for this turn, when it wrote any (used by Ask Setu for the final answer). */
+  text?: string;
 };
 
 /**
@@ -75,7 +77,8 @@ function anthropicSession({ config, system, tools, firstMessage, maxOutputTokens
       const calls = response.content
         .filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use")
         .map((b) => ({ id: b.id, name: b.name, input: b.input }));
-      return { stop: calls.length ? "tool_use" : "end", calls, usage };
+      const text = response.content.map((b) => (b.type === "text" ? b.text : "")).join("").trim();
+      return { stop: calls.length ? "tool_use" : "end", calls, usage, ...(text ? { text } : {}) };
     },
   };
 }
@@ -122,7 +125,8 @@ function geminiSession({ config, system, tools, firstMessage, maxOutputTokens }:
         name: c.name ?? "",
         input: c.args ?? {},
       }));
-      return { stop: calls.length ? "tool_use" : "end", calls, usage };
+      const text = candidate.content.parts?.map((p) => p.text ?? "").join("").trim();
+      return { stop: calls.length ? "tool_use" : "end", calls, usage, ...(text ? { text } : {}) };
     },
   };
 }
