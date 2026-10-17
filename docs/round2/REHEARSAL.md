@@ -6,6 +6,8 @@
 - Hub: 172 vitest tests pass (routing story numbers 0.396 / 0.12 / 0.378, tokens, schema guard, history totals 142 / 68% / 9, colleague edges, Ask Setu helpers). `next build` passes.
 - Hub database functions: a rolled-back SQL block on `oddyssey-kal` played the whole story: intro with 3 hops, idempotent yes, silent decline, re-route to 0.378, delivery as a 15-min call, points (Rohan 10, Priya 10, Meera 25, Vikram 0), hire +100 to the three helpers, no story names in events, a fourth open intro refused.
 
+- Deployed nodes (Render, Singapore, free plan): `https://setu-node-ngit.onrender.com` and `https://setu-node-rce.onrender.com`. Each answers `/health` (44 people), refuses a wrong hub token with 401, lists 44 directory entries with the hub token, and passes `scripts/mcp-smoke.mjs` with `identifying_fields=0`.
+
 ## Still to run on the deployed URLs (needs the service-role key and both Render nodes)
 
 Run twice in a row and record timings here.
