@@ -51,7 +51,7 @@ export function NetworkGraph({ connected, youLabel }: { connected: ConnItem[]; y
               const mx = gx + R_MEMBER * Math.cos(a);
               const my = gy + R_MEMBER * Math.sin(a);
               return (
-                <g key={c.id} className="route-link" style={{ animationDelay: `${0.3 + gi * 0.08 + i * 0.04}s` }}>
+                <g key={c.id} className="node-in" style={{ animationDelay: `${0.3 + gi * 0.08 + i * 0.04}s` }}>
                   <line x1={gx} y1={gy} x2={mx} y2={my} stroke="var(--ink)" strokeOpacity={0.35} />
                   <Link href={`/people/${c.person.id}`} aria-label={c.person.name}>
                     <circle cx={mx} cy={my} r={19} fill="#fff" stroke={g.tone} strokeWidth={4} />

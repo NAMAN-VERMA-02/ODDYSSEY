@@ -10,6 +10,9 @@ Repository: `ODDYSSEY` · Built for a hackathon.
 
 | Idea | How SETU does it |
 |---|---|
+| **A network, not a directory** | Students, alumni, faculty, founders, recruiters and the placement cell each have a real profile (expertise, what they are open to, what they are looking for or offering). `/people` finds the right person from a plain-words question and says why they match. `/network` shows who you are connected to as a hub-and-spoke graph. |
+| **Opportunities** | Alumni, faculty, founders, recruiters and the placement cell post jobs, internships, projects, research, referrals, mentoring and events. Everyone sees a feed ranked by skills, goal and intent, with the reasons. |
+| **Invites** | Recruiters and founders rarely have a college email. An alumnus, faculty member or the placement cell vouches for them with a single-use, 14-day invite link. |
 | **Past-self matching** | Compares a student with every senior's snapshot from the *same semester*: college tier 20, CGPA within 0.5 → 20, branch 15, backlogs 15, 10th within 5% → 10, 12th within 5% → 10, same direction 10. A rarity bonus rewards uncommon shared traits; the rarest one becomes the first line of the message. |
 | **Route map** | A branching D3 map of what the matched seniors did next (job, GATE, startup…) and where they landed. Counts only. |
 | **Introductions through a senior** | If a matched senior knows people at the student's target company (a count, never names), the student can ask that senior to pass the question on. Never more than 2 hops. The senior forwards a one-time link from their own phone; the recipient replies in one tap with no sign-up. |
@@ -19,18 +22,22 @@ Repository: `ODDYSSEY` · Built for a hackathon.
 | **Draft-writing agent** | An LLM agent reads the student's journey and matches and drafts first messages. The student edits and sends them. See [docs/agent.md](docs/agent.md). |
 | **LinkedIn PDF import** | The student's own "Save to PDF" is read once by an LLM into a semester-by-semester draft. The file is never stored. |
 
-## Try the demo (about 5 minutes)
+## Try the demo (about 7 minutes)
 
 Prerequisite: the app is running with the sample data loaded (see [Setup](#setup)).
 
 1. **Join.** Sign up at `/signup` with a `@kiet.edu` address, batch 2028 or later, 18 or older. Confirm the email link.
 2. **Share your journey** at `/onboarding`: a goal such as "SDE at Cognizant", marks as ranges, and each semester so far. Switch on only the marks you are happy to show.
-3. **See your matches** at `/matches`: "N seniors were where you are", the route map, and ranked match cards with the rarest shared trait as the opening line.
-4. **Draft messages.** Press *Draft messages for me*, edit a draft, and send it. (Or use *Ask* on any card.)
-5. **Bridge.** On a card that says "Knows 3 people at Cognizant", choose *pass it on*. Open `/requests` as the senior, press *Forward to someone I know*, and open the one-time link in a private window: it works without signing in.
-6. **Climb the ladder.** As the senior, accept, then unlock the next step. Note that *Referral* stays locked until work has been shared and seen.
-7. **Pay it forward** at `/payitforward`: report a success, then answer three juniors.
-8. **College dashboard** at `/college` (placement accounts only, see below).
+3. **See your matches** at `/matches`: "N seniors were where you are", the route map, and ranked cards with the rarest shared trait as the opening line.
+4. **Draft messages.** Press *Draft messages for me*, edit a draft, and send it. (Needs an AI key.)
+5. **Bridge.** On a card that says "Knows 3 people at Cognizant", choose *pass it on*. As the senior, open `/requests` and press *Forward to someone I know*; the one-time link works in a private window without signing in.
+6. **Be findable.** Fill in `/profile`: headline, expertise, what you are open to, and what you are looking for.
+7. **Find people.** At `/people` ask "who can help me with GATE and a backlog". Each result says why it matched. Connect with two or three.
+8. **See your network** at `/network`: you in the middle, spokes for students, alumni, faculty, founders, recruiters and the institution.
+9. **Opportunities.** At `/opportunities` filter by type, read the "why this fits you" notes, and show interest in one.
+10. **As a poster.** Log in as an alumnus, faculty member or recruiter: post at `/opportunities/new`, then open `/opportunities/mine` to see who is interested and shortlist them.
+11. **Invite a recruiter.** As an alumnus, create an invite at `/invites`, then open the link in a private window and sign up with any email.
+12. **Climb the ladder, pay it forward, and the college dashboard** at `/requests`, `/payitforward` and `/college` (placement accounts only, see below).
 
 ## Stack
 
@@ -79,6 +86,8 @@ Apply the files in `supabase/migrations/` in order (they are numbered). Then loa
 1. `supabase/seed.sql`: the demo college (`kiet.edu`, tier is a placeholder).
 2. `supabase/seed/sample_journeys.sql`: 150 synthetic journeys.
 3. `supabase/seed/sample_outcomes.sql`: placements, open questions, requests, pay-it-forward answers.
+4. `supabase/seed/sample_network.sql`: 12 faculty, 10 founders, 12 recruiters, profiles and intents for everyone, about 80 opportunities, about 400 connections and expressions of interest.
+5. `supabase/seed/demo_for_user.sql`: fills in the most recently created real account (profile and a few connections) so a fresh demo login does not look empty.
 
 Sample accounts use the reserved `@seed.invalid` domain and a "(sample)" name suffix, so none of them can log in or receive mail. Remove them with `delete from auth.users where email like '%@seed.invalid';`.
 
@@ -114,17 +123,18 @@ Designed on the principles of India's DPDP Act 2023 (data minimisation, separate
 
 ## What is built and what is not
 
-Built: signup with college-email verification and the 18+ check, journey form, LinkedIn PDF import, match scoring with rarity, route map, asks with the trust ladder, bridge forward links, silent declines, requests inbox, pay it forward, college dashboard, draft agent with guardrails, 150-journey demo data.
+Built: signup with college-email verification and the 18+ check, journey form, LinkedIn PDF import, match scoring with rarity, route map, asks with the trust ladder, bridge forward links, silent declines, requests inbox, pay it forward, college dashboard, draft agent with guardrails, role-based profiles and intents, people search with reasons, opportunities board (post, rank, interest, shortlist), connections and the network graph, invite-based signup for recruiters and founders, role-aware dashboards, and demo data for all of it.
 
 Not built yet, and not claimed:
 
+- Vouches (seniors vouching for a student's skills after seeing their work) and recruiter candidate search built on them.
+- In-app messaging and real-time updates.
 - Entering company counts, and the in-browser LinkedIn *connections* parser that would send only "company: count".
-- Importing the alumni list by the placement cell.
-- Faculty, founder and recruiter experiences beyond signing up.
-- Real-time updates and in-app messaging.
+- Importing the alumni list by the placement cell, announcements, and multi-college institutions.
+- Email or WhatsApp notifications and digests.
 - The "route did not work" markers on the route map (no outcome data for it yet).
-- The cinematic landing, editorial grid and footer styles described in [docs/design.md](docs/design.md); the current screens use the editorial palette only.
 - Shared rate limiting beyond the agent (the PDF import limit is per server instance).
+- The AI providers have been unit-tested with scripted models only. The Gemini adapter has not been run against the live API yet.
 
 What SETU does **not** claim: that it guarantees a referral or a job (it opens the route; the senior decides), that it knows who works where (it knows counts that consenting seniors shared), chains longer than 2 hops, or that the referral advantage figure is an Indian one.
 
