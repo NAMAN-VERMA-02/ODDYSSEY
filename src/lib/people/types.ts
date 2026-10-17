@@ -13,6 +13,7 @@ export type PersonCard = {
   openTo: string[];
   intents: { kind: string; category: string; statement: string }[];
   reasons: string[];
+  vouches?: number;
   connection: ConnState;
 };
 

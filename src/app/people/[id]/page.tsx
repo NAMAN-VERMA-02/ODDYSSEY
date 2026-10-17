@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { ConnectButton } from "@/components/people/connect-button";
+import { VouchPanel, type VouchItem } from "@/components/people/vouch-panel";
 import type { ConnState } from "@/lib/connections/types";
 import { createClient } from "@/lib/supabase/server";
 import { INTENT_LABELS, OPEN_TO_LABELS, type OpenTo } from "@/lib/validation/profile";
@@ -28,6 +29,23 @@ async function Person({ params }: { params: Promise<{ id: string }> }) {
   if (!p) notFound();
 
   const isMe = p.id === user.id;
+  const isStudent = p.role === "student";
+  const [{ data: vouchRows }, { data: canVouch }] = await Promise.all([
+    isStudent
+      ? supabase.from("vouches").select("id, voucher_id, skill, note").eq("student_id", id).order("created_at", { ascending: false }).limit(50)
+      : Promise.resolve({ data: [] as { id: string; voucher_id: string; skill: string; note: string | null }[] }),
+    isStudent && !isMe ? supabase.rpc("can_vouch", { p_student: id }) : Promise.resolve({ data: false }),
+  ]);
+  const voucherIds = [...new Set((vouchRows ?? []).map((v) => v.voucher_id))];
+  const { data: voucherUsers } = voucherIds.length
+    ? await supabase.from("users").select("id, full_name, role, current_company").in("id", voucherIds)
+    : { data: [] as { id: string; full_name: string; role: string; current_company: string | null }[] };
+  const voucherOf = new Map((voucherUsers ?? []).map((u) => [u.id, u]));
+  const vouchItems: VouchItem[] = (vouchRows ?? []).map((v) => {
+    const u = voucherOf.get(v.voucher_id);
+    return { id: v.id, skill: v.skill, note: v.note, mine: v.voucher_id === user.id, voucher: u ? { id: u.id, name: u.full_name, role: u.role, company: u.current_company } : null };
+  });
+
   const [{ data: intents }, { data: conn }, { data: mutual }] = await Promise.all([
     supabase.from("intents").select("kind, category, statement").eq("user_id", id).eq("active", true).order("created_at"),
     isMe
@@ -65,6 +83,8 @@ async function Person({ params }: { params: Promise<{ id: string }> }) {
               </ul>
             </section>
           )}
+
+          {isStudent && <VouchPanel studentId={p.id} initial={vouchItems} canVouch={Boolean(canVouch)} />}
 
           {(intents ?? []).length > 0 && (
             <section aria-labelledby="int-h">

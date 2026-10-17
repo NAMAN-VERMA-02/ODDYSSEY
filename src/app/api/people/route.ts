@@ -55,7 +55,14 @@ export async function GET(request: NextRequest) {
     stateOf.set(mine ? c.addressee_id : c.requester_id, c.status === "accepted" ? "connected" : mine ? "pending_out" : "pending_in");
   }
 
+  const vouchCount = new Map<string, number>();
+  for (const part of chunks(ids, 150)) {
+    const { data } = await supabase.from("vouches").select("student_id").in("student_id", part);
+    for (const v of data ?? []) vouchCount.set(v.student_id, (vouchCount.get(v.student_id) ?? 0) + 1);
+  }
+
   const rows: PersonRow[] = (users ?? []).map((u) => ({
+    vouches: vouchCount.get(u.id) ?? 0,
     id: u.id,
     fullName: u.full_name,
     role: u.role,
@@ -90,6 +97,7 @@ export async function GET(request: NextRequest) {
       openTo: p.openTo,
       intents: p.intents.slice(0, 3),
       reasons: p.reasons,
+      vouches: p.vouches ?? 0,
       connection: stateOf.get(p.id) ?? "none",
     })),
   });

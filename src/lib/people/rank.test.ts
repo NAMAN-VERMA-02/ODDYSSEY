@@ -75,3 +75,17 @@ describe("rankPeople filters and suggestions", () => {
     expect(r.map((p) => p.fullName)).toEqual(["Person a", "Person b"]);
   });
 });
+
+describe("rankPeople with vouches", () => {
+  it("lifts a vouched student and says so, capped so it cannot outweigh expertise", () => {
+    const people = [
+      person("plain", { role: "student", expertise: ["React"] }),
+      person("vouched", { role: "student", expertise: ["React"], vouches: 2 }),
+      person("many", { role: "student", expertise: ["React"], vouches: 9 }),
+    ];
+    const out = rankPeople({ text: "react" }, seeker, people, NOW);
+    expect(out.map((p) => p.id)).toEqual(["many", "vouched", "plain"]);
+    expect(out[1].reasons).toContain("Vouched for by 2 seniors");
+    expect(out[0].score - out[2].score).toBe(12);
+  });
+});

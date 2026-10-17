@@ -16,6 +16,8 @@ export type PersonRow = {
   intents: { kind: string; category: string; statement: string }[];
   lastActiveAt: string;
   helpOwed: number;
+  /** How many seniors or faculty have vouched for this person's skills. */
+  vouches?: number;
 };
 
 export type PeopleQuery = {
@@ -128,6 +130,11 @@ export function rankPeople(query: PeopleQuery, seeker: PeopleSeeker, people: Per
     if (idleDays <= 30) score += 6;
     else if (idleDays <= 90) score += 3;
     if (p.helpOwed > 0) score += 3;
+    const vouched = p.vouches ?? 0;
+    if (vouched > 0) {
+      score += Math.min(12, vouched * 4);
+      reasons.push(`Vouched for by ${vouched} ${vouched === 1 ? "senior" : "seniors"}`);
+    }
 
     out.push({ ...p, score: Math.round(score * 10) / 10, reasons });
   }
