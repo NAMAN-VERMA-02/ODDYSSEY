@@ -1,4 +1,4 @@
--- KAL initial schema. RLS is enabled on every table.
+-- SETU initial schema. RLS is enabled on every table.
 -- Server-only writes (helps, forward-link redemption) go through the service role,
 -- which bypasses RLS; there are deliberately no client policies for those.
 

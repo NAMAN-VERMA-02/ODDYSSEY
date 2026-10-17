@@ -1,4 +1,4 @@
--- Create the KAL profile only once the user has confirmed a mailbox on their
+-- Create the SETU profile only once the user has confirmed a mailbox on their
 -- college's email domain. Runs inside the database, so no service-role key is
 -- needed in the app and clients cannot set college_email_verified themselves.
 -- Sign-up data comes from auth user metadata; the date of birth is never stored,

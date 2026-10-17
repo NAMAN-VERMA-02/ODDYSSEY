@@ -20,7 +20,7 @@ describe("forward tokens", () => {
     expect(isWellFormedToken("../".repeat(20))).toBe(false);
   });
   it("builds the public link", () => {
-    expect(forwardUrl("https://kal.example/", "tok")).toBe("https://kal.example/f/tok");
+    expect(forwardUrl("https://setu.example/", "tok")).toBe("https://setu.example/f/tok");
   });
 });
 

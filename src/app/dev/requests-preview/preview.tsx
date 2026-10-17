@@ -92,7 +92,7 @@ export function RequestsPreview() {
 
   async function onAction(id: string, body: Record<string, unknown>): Promise<ActionResult> {
     if (body.action === "forward") {
-      return { ok: true, link: "https://kal.example/f/Qm9r8s2LxT0uVw7yZaB3cD4eF5gH6iJ7kL8mN9oP0qR", expiresAt: iso(4) };
+      return { ok: true, link: "https://setu.example/f/Qm9r8s2LxT0uVw7yZaB3cD4eF5gH6iJ7kL8mN9oP0qR", expiresAt: iso(4) };
     }
     if (body.action === "decline") {
       setData((d) => ({ ...d, received: d.received.filter((a) => a.id !== id) }));

@@ -10,7 +10,7 @@ import { useEffect } from "react";
 export function Preloader() {
   useEffect(() => {
     try {
-      sessionStorage.setItem("kal-intro", "1");
+      sessionStorage.setItem("setu-intro", "1");
     } catch {
       // storage can be blocked; the intro simply shows again next time
     }
