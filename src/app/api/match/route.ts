@@ -103,25 +103,23 @@ export async function GET(request: NextRequest) {
   if (!seniors?.length) return NextResponse.json({ semester, total: 0, bridgeBlocked, routeMap: buildRouteMap([]), matches: [] });
 
   const ids = seniors.map((s) => s.id as string);
-  const nowIso = new Date().toISOString();
 
   const snapshots: SnapshotRow[] = [];
   const contacts = new Map<string, { company: string; count: number }>();
   const pending = new Map<string, number>();
 
   for (const part of chunks(ids, CHUNK)) {
-    const [snaps, counts, asVia, asTarget] = await Promise.all([
+    const [snaps, counts, waiting] = await Promise.all([
       admin.from("snapshots").select("*").in("user_id", part).eq("semester", semester),
       goalCompany
         ? admin.from("company_counts").select("user_id, company, count").in("user_id", part).ilike("company", escapeLike(goalCompany))
         : Promise.resolve({ data: [] as { user_id: string; company: string; count: number }[] }),
-      admin.from("asks").select("via_id").in("via_id", part).eq("status", "pending").gt("expires_at", nowIso),
-      admin.from("asks").select("target_id").in("target_id", part).eq("status", "pending").gt("expires_at", nowIso),
+      // Waiting requests per senior, leaving out silently declined ones.
+      admin.rpc("waiting_asks_for", { p_ids: part }),
     ]);
     snapshots.push(...((snaps.data ?? []) as SnapshotRow[]));
     for (const c of counts.data ?? []) contacts.set(c.user_id, { company: c.company, count: c.count });
-    for (const a of asVia.data ?? []) pending.set(a.via_id, (pending.get(a.via_id) ?? 0) + 1);
-    for (const a of asTarget.data ?? []) pending.set(a.target_id, (pending.get(a.target_id) ?? 0) + 1);
+    for (const w of (waiting.data ?? []) as { user_id: string; waiting: number }[]) pending.set(w.user_id, w.waiting);
   }
 
   const byId = new Map(seniors.map((s) => [s.id as string, s]));
