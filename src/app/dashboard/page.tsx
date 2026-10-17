@@ -30,6 +30,7 @@ async function Profile() {
         {profile.college_email_verified ? " · college email verified" : ""}
       </p>
       <p className="mb-6">
+        <Link href="/matches" className="underline">See your matches</Link>{" · "}
         <Link href="/onboarding" className="underline">Edit your journey</Link>
       </p>
       <form action={signOut}>

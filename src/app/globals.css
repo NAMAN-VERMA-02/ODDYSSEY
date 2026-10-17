@@ -7,6 +7,9 @@
   --red: #c4381f;
   --blue: #9fd5f7;
   --yellow: #fcdd71;
+  --red-tile: #ef5d44;
+  --sage: #b9c9b4;
+  --stone: #d9d6cc;
 }
 
 @theme inline {
@@ -26,5 +29,18 @@ body {
   * {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+  }
+}
+
+/* Route map: links draw in from the root outwards. */
+.route-link {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: route-draw 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes route-draw {
+  to {
+    stroke-dashoffset: 0;
   }
 }
