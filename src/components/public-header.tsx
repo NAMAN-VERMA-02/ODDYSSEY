@@ -14,7 +14,7 @@ export function PublicHeader({ minimal = false }: { minimal?: boolean }) {
           <Link href="/login" className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--paper)]">
             Log in
           </Link>
-          <Link href="/signup" className="rounded-full bg-[var(--ink)] px-5 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5">
+          <Link href="/signup" data-magnetic className="rounded-full bg-[var(--ink)] px-5 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5">
             Join KAL
           </Link>
         </nav>

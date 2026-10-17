@@ -18,9 +18,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             Your college’s own network
           </p>
           <p className="text-[clamp(3rem,6.2vw,6rem)] font-black uppercase leading-[0.88] tracking-[-0.04em]" aria-hidden="true">
-            {["Their yesterday", "is your", "tomorrow."].map((line, i) => (
+            {["Their yesterday", "is your", "_tomorrow._"].map((line, i) => (
               <span key={line} className="mask-line" style={{ "--d": `${0.2 + i * 0.12}s` } as React.CSSProperties}>
-                <span>{line}</span>
+                <span>
+                  {line.startsWith("_") ? <span className="accent">{line.slice(1, -1)}</span> : line}
+                </span>
               </span>
             ))}
           </p>

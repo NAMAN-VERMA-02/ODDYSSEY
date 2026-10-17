@@ -28,7 +28,7 @@ export default function MatchesPage() {
   return (
     <PageShell
       eyebrow="Past-self matches"
-      title={["Where you are,", "where they went"]}
+      title={["Where you are,", "_where they went_"]}
       lede="Seniors from your college who stood in your exact position, and the routes they took next."
     >
       <Suspense>

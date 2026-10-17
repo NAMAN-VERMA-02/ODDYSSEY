@@ -31,7 +31,7 @@ export function CollegeDashboard({ stats }: { stats: CollegeStats }) {
         <Tile label="Paid forward" value={String(stats.helps)} sub={`answers from ${stats.helpers} seniors · ${stats.help_owed_open} still owed`} tone="var(--sage)" />
       </ul>
 
-      <section aria-labelledby="ladder-h" className="rounded-[22px] bg-white p-5 sm:p-8 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
+      <section aria-labelledby="ladder-h" className="reveal rounded-[22px] bg-white p-5 sm:p-8 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
         <h2 id="ladder-h" className="text-2xl font-black uppercase tracking-tight">Climbing the trust ladder</h2>
         <p className="mb-5 mt-1 text-sm text-[var(--muted)]">
           How far {asks} requests got: a question, then a call, a small task, and only then a referral.
@@ -57,7 +57,7 @@ export function CollegeDashboard({ stats }: { stats: CollegeStats }) {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section aria-labelledby="co-h" className="rounded-[22px] bg-white p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
+        <section aria-labelledby="co-h" className="reveal rounded-[22px] bg-white p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
           <h2 id="co-h" className="text-xl font-black uppercase tracking-tight">Where members landed</h2>
           {stats.top_companies.length === 0 ? (
             <p className="mt-3 text-sm text-[var(--muted)]">Companies appear once at least two members have landed there.</p>
@@ -73,7 +73,7 @@ export function CollegeDashboard({ stats }: { stats: CollegeStats }) {
           )}
         </section>
 
-        <section aria-labelledby="mem-h" className="rounded-[22px] bg-white p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
+        <section aria-labelledby="mem-h" className="reveal rounded-[22px] bg-white p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
           <h2 id="mem-h" className="text-xl font-black uppercase tracking-tight">Who is on KAL</h2>
           <ul className="mt-3 divide-y divide-[var(--ink)]/10">
             {roles.map(([role, n]) => (

@@ -115,6 +115,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
             </div>
             <Link
               href={next.href}
+              data-magnetic
               className="shrink-0 rounded-full bg-[var(--yellow)] px-7 py-3 text-center text-base font-bold text-[var(--ink)] transition-transform hover:-translate-y-1"
             >
               {next.cta} →
@@ -150,7 +151,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
 
         {/* Path + how it works */}
         <div className="mt-16 grid gap-10 lg:grid-cols-[1fr_1.4fr]">
-          <section aria-labelledby="path-h" className="rise" style={{ "--d": "1.3s" } as React.CSSProperties}>
+          <section aria-labelledby="path-h" className="reveal">
             <h2 id="path-h" className="text-3xl font-black uppercase leading-none tracking-tight">
               Your path
             </h2>
@@ -179,7 +180,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
             </ol>
           </section>
 
-          <section aria-labelledby="how-h" className="rise" style={{ "--d": "1.45s" } as React.CSSProperties}>
+          <section aria-labelledby="how-h" className="reveal" style={{ "--d": "0.12s" } as React.CSSProperties}>
             <h2 id="how-h" className="text-3xl font-black uppercase leading-none tracking-tight">
               How KAL works
             </h2>

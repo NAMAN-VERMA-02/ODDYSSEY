@@ -7,7 +7,7 @@ export default function RequestsPage() {
   return (
     <PageShell
       eyebrow="Trust, one step at a time"
-      title={["Your", "requests"]}
+      title={["Your", "_requests_"]}
       lede="A question, then a call, then a small task. A referral only unlocks once your work has been seen."
     >
       <RequestsView />

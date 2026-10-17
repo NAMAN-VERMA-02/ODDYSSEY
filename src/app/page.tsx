@@ -23,23 +23,23 @@ export default function Home() {
       <main className="mx-auto w-full max-w-6xl px-4 pb-20 pt-10 sm:px-6 sm:pt-16">
         <Hero
           eyebrow="Your college’s own alumni network"
-          lines={["Their yesterday", "is your", "tomorrow."]}
+          lines={["Their yesterday", "is your", "_tomorrow._"]}
           size="clamp(3rem, 11vw, 9.5rem)"
           lede="KAL matches you to the seniors who were once exactly where you are now, shows the routes they took, and helps you reach them through people they trust."
         />
 
         <div className="rise -mt-4 mb-16 flex flex-wrap gap-3" style={{ "--d": "1s" } as React.CSSProperties}>
-          <Link href="/signup" className="rounded-full bg-[var(--ink)] px-8 py-3.5 text-base font-bold text-white transition-transform hover:-translate-y-1">
+          <Link href="/signup" data-magnetic className="rounded-full bg-[var(--ink)] px-8 py-3.5 text-base font-bold text-white transition-transform hover:-translate-y-1">
             Join KAL →
           </Link>
-          <Link href="/login" className="rounded-full border border-[var(--ink)] px-8 py-3.5 text-base font-bold transition-transform hover:-translate-y-1">
+          <Link href="/login" data-magnetic className="rounded-full border border-[var(--ink)] px-8 py-3.5 text-base font-bold transition-transform hover:-translate-y-1">
             Log in
           </Link>
         </div>
 
         <ul className="grid gap-4 md:grid-cols-3" aria-label="How KAL works">
           {STEPS.map((s, i) => (
-            <li key={s.n} className="rise tile rounded-[22px] p-6" style={{ background: s.tone, "--d": `${1.1 + i * 0.12}s` } as React.CSSProperties}>
+            <li key={s.n} className="reveal tile rounded-[22px] p-6" style={{ background: s.tone, "--d": `${i * 0.12}s` } as React.CSSProperties}>
               <p className="text-5xl font-black leading-none opacity-30">{s.n}</p>
               <h2 className="mt-8 text-2xl font-black uppercase leading-none tracking-tight">{s.title}</h2>
               <p className="mt-3">{s.text}</p>
@@ -47,7 +47,7 @@ export default function Home() {
           ))}
         </ul>
 
-        <section aria-labelledby="trust-h" className="rise mt-16" style={{ "--d": "1.5s" } as React.CSSProperties}>
+        <section aria-labelledby="trust-h" className="reveal mt-16">
           <h2 id="trust-h" className="text-3xl font-black uppercase leading-none tracking-tight">
             Built to be safe to ask
           </h2>

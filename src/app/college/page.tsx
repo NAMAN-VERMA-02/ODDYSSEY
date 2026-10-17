@@ -31,7 +31,7 @@ export default function CollegePage() {
   return (
     <PageShell
       eyebrow="For the placement cell"
-      title={["Your college", "on KAL"]}
+      title={["Your college", "_on KAL_"]}
       lede="Engagement, how far requests climb the trust ladder, placements and help paid forward. Counts only."
     >
       <Suspense>

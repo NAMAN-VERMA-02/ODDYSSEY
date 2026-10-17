@@ -51,7 +51,7 @@ export default function OnboardingPage() {
   return (
     <PageShell
       eyebrow="About five minutes"
-      title={["Your", "journey"]}
+      title={["Your", "_journey_"]}
       lede={
         <>
           Share where you are, semester by semester. KAL uses it to find seniors who stood exactly here.{" "}

@@ -17,7 +17,7 @@ const TRAIT_LABELS: Record<TraitKey, string> = {
 function MatchCard({ m, bridgeBlocked, demo }: { m: Match; bridgeBlocked: boolean; demo?: boolean }) {
   const bridge = m.routes.find((r) => r.type === "via_senior");
   return (
-    <li className="rounded-[22px] bg-white p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
+    <li className="reveal rounded-[22px] bg-white p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-xl font-black uppercase leading-tight tracking-tight">{m.displayName}</h3>

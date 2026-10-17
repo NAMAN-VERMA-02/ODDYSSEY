@@ -1,3 +1,20 @@
+/** Renders _word_ as an italic serif accent. */
+function Accented({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(_[^_]+_)/g).map((part, i) =>
+        part.startsWith("_") && part.endsWith("_") ? (
+          <span key={i} className="accent">
+            {part.slice(1, -1)}
+          </span>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
 /** Big uppercase page title: each line rises from behind a mask, then the intro fades up. */
 export function Hero({
   id = "page-title",
@@ -22,7 +39,9 @@ export function Hero({
       <h1 id={id} className="font-black uppercase leading-[0.88] tracking-[-0.04em]" style={{ fontSize: size }}>
         {lines.map((line, i) => (
           <span key={line} className="mask-line" style={{ "--d": `${0.2 + i * 0.12}s` } as React.CSSProperties}>
-            <span>{line}</span>
+            <span>
+              <Accented text={line} />
+            </span>
           </span>
         ))}
       </h1>
