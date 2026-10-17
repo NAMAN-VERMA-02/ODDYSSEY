@@ -36,13 +36,13 @@ function Tile({
       <Link
         href={href}
         className="tile group relative flex h-full min-h-48 flex-col justify-between rounded-[22px] p-5 outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]"
-        style={{ background: tone, color: dark ? "#fff" : "var(--ink)" }}
+        style={{ background: tone, color: dark ? "var(--on-ink)" : "var(--ink)" }}
       >
         <div className="flex items-start justify-between">
           <span className="text-sm font-semibold uppercase tracking-wide">{label}</span>
           <span
             className="tile-arrow grid size-9 place-items-center rounded-full text-lg"
-            style={{ background: dark ? "#fff" : "var(--ink)", color: dark ? "var(--ink)" : "#fff" }}
+            style={{ background: dark ? "var(--on-ink)" : "var(--ink)", color: dark ? "var(--ink)" : "var(--on-ink)" }}
             aria-hidden="true"
           >
             →
@@ -65,7 +65,7 @@ function tilesFor(data: DashboardData): TileSpec[] {
   const opps: TileSpec = { href: "/opportunities", tone: "var(--yellow)", label: "Opportunities", big: <CountUp to={st.openOpps ?? 0} />, sub: "open to your college, ranked for you" };
   const people: TileSpec = { href: "/people", tone: "var(--sage)", label: "People", big: <CountUp to={st.people ?? 0} />, sub: "to find by what they know and offer" };
   const network: TileSpec = { href: "/network", tone: "var(--stone)", label: "Network", big: <CountUp to={st.connections ?? 0} />, sub: `connections${st.incomingConnections ? ` · ${st.incomingConnections} waiting` : ""}` };
-  const profile: TileSpec = { href: "/profile", tone: "#fff", label: "Your profile", big: `${st.profilePercent ?? 0}%`, sub: "complete · be easy to find" };
+  const profile: TileSpec = { href: "/profile", tone: "var(--surface)", label: "Your profile", big: `${st.profilePercent ?? 0}%`, sub: "complete · be easy to find" };
   const requests: TileSpec = { href: "/requests", tone: "var(--yellow)", label: "Requests", big: <CountUp to={st.waitingOnMe} />, sub: `waiting on you · ${st.sent} sent by you` };
   const payForward: TileSpec = {
     href: "/payitforward",
@@ -81,7 +81,7 @@ function tilesFor(data: DashboardData): TileSpec[] {
       return [
         { href: "/matches", tone: "var(--blue)", label: "Your matches", big: "Meet", sub: "Seniors who were exactly where you are" },
         opps, people, network, requests, payForward, profile,
-        { href: "/onboarding", tone: "#fff", label: "Your journey", big: <CountUp to={st.semesters} />, sub: "semesters shared · edit any time" },
+        { href: "/onboarding", tone: "var(--surface)", label: "Your journey", big: <CountUp to={st.semesters} />, sub: "semesters shared · edit any time" },
       ];
     case "alumni":
       return [people, opps, network, requests, posts, payForward, profile, { href: "/invites", tone: "var(--blue)", label: "Invites", big: "Vouch", sub: "bring in recruiters and founders" }];

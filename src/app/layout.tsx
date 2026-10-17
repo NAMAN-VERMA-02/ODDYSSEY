@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { CursorFx } from "@/components/fx/cursor-fx";
 import { INTRO_SCRIPT } from "@/components/fx/intro-script";
+import { THEME_SCRIPT } from "@/components/fx/theme-script";
 import { Preloader } from "@/components/fx/preloader";
 import { ScrollReveal } from "@/components/fx/scroll-reveal";
 import "./globals.css";
 import "./motion.css";
+import "./theme.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT + THEME_SCRIPT }} />
       </head>
       <body id="top" className="min-h-full flex flex-col">
         <Preloader />

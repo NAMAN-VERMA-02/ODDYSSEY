@@ -54,7 +54,7 @@ export function NetworkGraph({ connected, youLabel }: { connected: ConnItem[]; y
                 <g key={c.id} className="node-in" style={{ animationDelay: `${0.3 + gi * 0.08 + i * 0.04}s` }}>
                   <line x1={gx} y1={gy} x2={mx} y2={my} stroke="var(--ink)" strokeOpacity={0.35} />
                   <Link href={`/people/${c.person.id}`} aria-label={c.person.name}>
-                    <circle cx={mx} cy={my} r={19} fill="#fff" stroke={g.tone} strokeWidth={4} />
+                    <circle cx={mx} cy={my} r={19} fill="var(--surface)" stroke={g.tone} strokeWidth={4} />
                     <text x={mx} y={my + 4} textAnchor="middle" className="fill-[var(--ink)] text-[11px] font-bold">
                       {initials(c.person.name)}
                     </text>

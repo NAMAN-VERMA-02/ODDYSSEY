@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/fx/theme-toggle";
 
 /** Floating header for pages that do not need a signed-in user. */
 export function PublicHeader({ minimal = false }: { minimal?: boolean }) {
@@ -9,16 +10,17 @@ export function PublicHeader({ minimal = false }: { minimal?: boolean }) {
           <span className="text-3xl">SETU</span>
           <span className="text-sm font-medium normal-case text-[var(--muted)]">सेतु</span>
         </Link>
-        {!minimal && (
         <nav aria-label="Account" className="flex items-center gap-2">
+          <ThemeToggle />
+          {!minimal && (<>
           <Link href="/login" className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--paper)]">
             Log in
           </Link>
           <Link href="/signup" data-magnetic className="rounded-full bg-[var(--ink)] px-5 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5">
             Join SETU
           </Link>
+          </>)}
         </nav>
-        )}
       </div>
     </header>
   );
