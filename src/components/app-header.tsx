@@ -11,6 +11,7 @@ function linksFor(role: string): NavLink[] {
     { href: "/opportunities", label: "Opportunities" },
     { href: "/network", label: "Network" },
     { href: "/messages", label: "Messages", badge: { countUrl: "/api/messages/unread", table: "messages" } },
+    { href: "/notifications", label: "Updates", badge: { countUrl: "/api/notifications/unread", table: "notifications" } },
   ];
   const own: NavLink[] =
     role === "student"
