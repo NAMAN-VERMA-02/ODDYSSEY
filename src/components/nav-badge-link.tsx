@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -10,6 +10,8 @@ import { createClient } from "@/lib/supabase/client";
  */
 export function NavBadgeLink({ href, label, countUrl, table, className }: { href: string; label: string; countUrl: string; table: string; className: string }) {
   const [count, setCount] = useState(0);
+  // The header renders this link twice (desktop and mobile nav); each needs its own channel.
+  const instance = useId();
 
   useEffect(() => {
     let alive = true;
@@ -22,7 +24,7 @@ export function NavBadgeLink({ href, label, countUrl, table, className }: { href
 
     const supabase = createClient();
     const channel = supabase
-      .channel(`badge-${table}`)
+      .channel(`badge-${table}-${instance}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table }, load)
       .subscribe();
     const poll = setInterval(load, 60_000);
@@ -34,7 +36,7 @@ export function NavBadgeLink({ href, label, countUrl, table, className }: { href
       window.removeEventListener("setu:badge-refresh", load);
       supabase.removeChannel(channel);
     };
-  }, [countUrl, table]);
+  }, [countUrl, table, instance]);
 
   return (
     <Link href={href} className={className}>

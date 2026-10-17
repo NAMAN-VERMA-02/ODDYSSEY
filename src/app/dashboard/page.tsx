@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { DashboardView, type DashboardData } from "@/components/dashboard/dashboard-view";
 import { isExpired } from "@/lib/asks/trust";
 import { profileCompleteness } from "@/lib/profile/completeness";
@@ -8,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata = { title: "Dashboard" };
 
 async function Home() {
+  await connection(); // uses the current time below, so render per request
   const supabase = await createClient();
   const {
     data: { user },
