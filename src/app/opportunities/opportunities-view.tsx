@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { OpportunityFeed } from "@/components/opportunities/opportunity-feed";
+import { useLive } from "@/lib/live/use-live";
 import type { FeedResponse, Result } from "@/lib/opportunities/types";
 
 type State = { status: "loading" } | { status: "error"; message: string } | { status: "ok"; data: FeedResponse };
@@ -26,6 +27,8 @@ export function OpportunitiesView() {
   const [q, setQ] = useState("");
   const [debounced, setDebounced] = useState("");
   const [state, setState] = useState<State>({ status: "loading" });
+  const [tick, setTick] = useState(0); // bumps when a live change arrives, which refetches
+  useLive(() => setTick((t) => t + 1));
 
   useEffect(() => {
     const id = window.setTimeout(() => setDebounced(q), 250);
@@ -47,7 +50,7 @@ export function OpportunitiesView() {
       }
     })();
     return () => controller.abort();
-  }, [kind, debounced]);
+  }, [kind, debounced, tick]);
 
   if (state.status === "error") {
     return (

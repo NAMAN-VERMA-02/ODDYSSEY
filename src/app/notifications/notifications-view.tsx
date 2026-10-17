@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { NotificationList } from "@/components/notifications/notification-list";
+import { useLive } from "@/lib/live/use-live";
 import type { NotificationItem } from "@/lib/notifications/types";
 
 const refreshBadge = () => window.dispatchEvent(new Event("setu:badge-refresh"));
@@ -10,6 +11,8 @@ export function NotificationsView() {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [emailDigest, setEmailDigest] = useState(true);
+  const [tick, setTick] = useState(0); // bumps when a live change arrives, which refetches
+  useLive(() => setTick((t) => t + 1));
 
   useEffect(() => {
     let alive = true;
@@ -26,7 +29,7 @@ export function NotificationsView() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [tick]);
 
   async function markAll() {
     const res = await fetch("/api/notifications/read", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ConnectButton } from "@/components/people/connect-button";
 import { PeopleList } from "@/components/people/people-list";
+import { useLive } from "@/lib/live/use-live";
 import type { PeopleResponse } from "@/lib/people/types";
 
 export function PeopleView() {
@@ -12,6 +13,8 @@ export function PeopleView() {
   const [openTo, setOpenTo] = useState("");
   const [data, setData] = useState<PeopleResponse | null>(null);
   const [error, setError] = useState("");
+  const [tick, setTick] = useState(0); // bumps when a live change arrives, which refetches
+  useLive(() => setTick((t) => t + 1));
 
   useEffect(() => {
     const id = window.setTimeout(() => setDebounced(q), 300);
@@ -37,7 +40,7 @@ export function PeopleView() {
       }
     })();
     return () => controller.abort();
-  }, [debounced, role, openTo]);
+  }, [debounced, role, openTo, tick]);
 
   return (
     <>

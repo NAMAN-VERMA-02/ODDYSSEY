@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { PayForwardBoard, type PayForwardHandlers, type Result } from "@/components/payitforward/pay-forward-board";
+import { useLive } from "@/lib/live/use-live";
 import type { PayItForwardResponse } from "@/lib/validation/payforward";
 
 type State =
@@ -40,6 +41,7 @@ export function PayItForwardView() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
+  useLive(refresh);
 
   if (state.status === "loading") {
     return <div className="h-56 animate-pulse rounded-[22px] bg-white" role="status" aria-label="Loading" />;

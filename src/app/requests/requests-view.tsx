@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { RequestsBoard } from "@/components/requests/requests-board";
 import { loadAsks, patchAsk } from "@/lib/asks/client";
 import type { AsksResponse } from "@/lib/asks/types";
+import { useLive } from "@/lib/live/use-live";
 
 type State =
   | { status: "loading" }
@@ -23,6 +24,7 @@ export function RequestsView() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
+  useLive(refresh);
 
   if (state.status === "loading") {
     return (

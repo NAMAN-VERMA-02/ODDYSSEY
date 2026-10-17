@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
 import { ThemeToggle } from "@/components/fx/theme-toggle";
+import { LiveRefresh } from "@/components/live-refresh";
 import { NavBadgeLink } from "@/components/nav-badge-link";
 
 type NavLink = { href: string; label: string; badge?: { countUrl: string; table: string } };
@@ -52,6 +53,7 @@ export function AppHeader({ role = "student" }: { role?: string }) {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LiveRefresh />
           <ThemeToggle />
           <form action={signOut}>
             <button type="submit" className="rounded-full bg-[var(--ink)] px-5 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5">

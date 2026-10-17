@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useLive } from "@/lib/live/use-live";
 import type { MineResponse } from "@/lib/opportunities/types";
 import { OPP_LABELS, type OppKind } from "@/lib/validation/opportunities";
 
@@ -34,6 +35,7 @@ export function MineView() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
+  useLive(refresh);
 
   if (state.status === "loading") return <div className="h-40 animate-pulse rounded-[22px] bg-white" role="status" aria-label="Loading" />;
   if (state.status === "error") return <p role="alert" className="rounded-xl bg-white p-4 text-[var(--red)]">{state.message}</p>;

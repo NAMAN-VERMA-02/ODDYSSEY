@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AnnouncementBoard } from "@/components/college/announcement-board";
+import { useLive } from "@/lib/live/use-live";
 import type { AnnouncementInput, AnnouncementItem } from "@/lib/validation/announcements";
 
 export function AnnouncementsView({ canPost }: { canPost: boolean }) {
@@ -28,6 +29,7 @@ export function AnnouncementsView({ canPost }: { canPost: boolean }) {
       alive = false;
     };
   }, []);
+  useLive(load);
 
   async function post(input: AnnouncementInput): Promise<string | null> {
     const res = await fetch("/api/announcements", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(input) });

@@ -8,6 +8,7 @@ import { ScrollReveal } from "@/components/fx/scroll-reveal";
 import "./globals.css";
 import "./motion.css";
 import "./theme.css";
+import "./ambient.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { NetworkBoard } from "@/components/network/network-board";
+import { useLive } from "@/lib/live/use-live";
 import type { ConnectionsResponse } from "@/lib/connections/types";
 
 type State = { status: "loading" } | { status: "error"; message: string } | { status: "ok"; data: ConnectionsResponse };
@@ -24,6 +25,7 @@ export function NetworkView() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
+  useLive(refresh);
 
   async function act(id: string, action: "accept" | "decline" | "remove") {
     try {
