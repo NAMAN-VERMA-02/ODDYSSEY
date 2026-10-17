@@ -24,6 +24,9 @@ To see the college dashboard, switch your own account to the placement role in t
 
 To try `/api/match` end to end, add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local`, sign up with a `@kiet.edu` address (batch 2028 or later), fill in your journey, then open `/api/match`.
 
+## Draft-writing agent
+An LLM agent drafts first messages for a student's best matches; the student edits and sends them. See [docs/agent.md](docs/agent.md) for the flow diagram and guardrails.
+
 ## Privacy and guardrails
 - Marks are shown only as ranges, and only if the user opts in.
 - Company counts are shown only if the count is 2 or more; names never reach the server.
