@@ -51,11 +51,15 @@ export async function login(_prev: AuthFormState, formData: FormData): Promise<A
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
-    return {
-      message: /not confirmed/i.test(error.message)
-        ? "Confirm your college email first — check your inbox for the link."
-        : "Invalid email or password.",
-    };
+    if (/not confirmed/i.test(error.message)) {
+      return { message: "Confirm your college email first — check your inbox for the link." };
+    }
+    // KAL only has college accounts: say so when the address could never have one.
+    const { data: colleges } = await supabase.from("colleges").select("email_domain");
+    if (!emailMatchesCollege(parsed.data.email, (colleges ?? []).map((c) => c.email_domain))) {
+      return { message: "KAL is for college emails. Log in with your college address, or join with it." };
+    }
+    return { message: "Invalid email or password." };
   }
   redirect("/dashboard");
 }
