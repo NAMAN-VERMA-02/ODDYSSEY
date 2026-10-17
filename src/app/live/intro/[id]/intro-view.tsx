@@ -26,8 +26,10 @@ function statusLine(intro: Intro, hops: Hop[]): { text: string; tone: "wait" | "
   if (intro.status === "delivered") return { text: "Delivered. Your intro reached them.", tone: "good" };
   if (intro.status === "failed") return { text: "No other route was found.", tone: "bad" };
   if (intro.status === "needs_reroute") return { text: "Someone couldn’t help — re-routing…", tone: "bad" };
-  const sent = hops.find((h) => h.status === "sent");
-  return { text: sent ? `Waiting for hop ${sent.idx} of ${hops.filter((h) => h.status !== "cancelled" && h.status !== "declined").length}…` : "Working…", tone: "wait" };
+  // count only hops still on the live route, so a re-route never reads "hop 4 of 3"
+  const live = hops.filter((h) => h.status !== "cancelled" && h.status !== "declined").sort((a, b) => a.idx - b.idx);
+  const position = live.findIndex((h) => h.status === "sent") + 1;
+  return { text: position > 0 ? `Waiting for hop ${position} of ${live.length}…` : "Working…", tone: "wait" };
 }
 
 export function IntroView({ paramsPromise }: { paramsPromise: Promise<{ id: string }> }) {
@@ -48,7 +50,10 @@ export function IntroView({ paramsPromise }: { paramsPromise: Promise<{ id: stri
   useFedLive(["fed_hops", "fed_intros", "fed_events"], load);
 
   const viewer = data?.viewer ?? {};
-  const names = useNames(viewer, data?.people.map((p) => p.pid) ?? []);
+  // A name is shown only once that person has said yes (plus the requester's own). Waiting people stay anonymous,
+  // even though a college would hand out the name of anyone who chose to be on its leaderboard.
+  const nameable = data ? [data.intro.requester, ...data.hops.filter((h) => h.status === "accepted").map((h) => h.to_pid)] : [];
+  const names = useNames(viewer, nameable);
 
   // notes live on the requester's own college server; read them straight from there
   const requesterNode = data?.intro.requester.split("_")[0] as "ngit" | "rce" | undefined;

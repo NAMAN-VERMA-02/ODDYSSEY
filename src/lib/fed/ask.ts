@@ -2,7 +2,7 @@ import "server-only";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { createAgentSession, type AgentTurn, type NeutralTool, type ToolResult } from "@/lib/llm/agent-session";
-import { readLlmConfig } from "@/lib/llm/config";
+import { fedLlmConfig } from "./llm";
 import { ASK_SYSTEM, dedupeCards, extractCards, planOffline, templateAnswer, type AskCard, type TraceEntry } from "./ask-core";
 import { configuredNodes, type NodeConfig, type NodeId } from "./config";
 import { offlineNodeIds } from "./server";
@@ -69,7 +69,7 @@ async function runOffline(question: string, conns: Connected[], offline: string[
 }
 
 async function runAi(question: string, conns: Connected[], offline: string[], trace: TraceEntry[], deadline: number): Promise<AskResult | null> {
-  const config = readLlmConfig();
+  const config = fedLlmConfig();
   if (!config) return null;
   const tools: NeutralTool[] = conns.flatMap((c) =>
     c.tools.map((t) => ({ name: `${c.cfg.id}__${t.name}`, description: `[${c.cfg.id.toUpperCase()}] ${t.description ?? ""}`, schema: t.inputSchema })),

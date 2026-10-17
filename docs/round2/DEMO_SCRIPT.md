@@ -8,7 +8,7 @@
 |---|---|---|
 | 0:00 | **Hook** (P) | `/live`: two college servers with real URLs, people counts, green lights, plus the Hub. "Round 1 mein aapne poocha: colleges data kyun denge? Jawab: nahi denge. Aur Setu ko chahiye bhi nahi." |
 | 0:40 | **Judges join** (J) | P: Stage → "Show join QR". Judges make a 30-second profile on `/join` (straight to the NGIT or RCE server) and see their own Mirror. Privacy ticker: "NGIT server stored 1 new profile · Setu Hub received 1 pseudonymous ID, 0 identifying fields." |
-| 1:40 | **Mirror** (P as Aman) | `/live/mirror`: "7 people were where you are." Top card: NGIT alum ’22 · ML Engineer, FinStack · 94%, rarest-trait line, then → now. "Her name is hidden. Setu doesn't know it — NGIT's server does." |
+| 1:40 | **Mirror** (P as Aman) | `/live/mirror`: "6 people were where you are." Top card: NGIT alum ’22 · ML Engineer, FinStack · 94%, rarest-trait line, then → now. "Her name is hidden. Setu doesn't know it — NGIT's server does." |
 | 2:40 | **Bridge** (P) | Search FinStack → "Hiring Manager – ML · RCE alum ’15". Shortest path 12% vs best path 39.6% (0.9 × 0.8 × 0.55). **Draft with AI**, edit, **Send**. Aman's Karz +10. |
 | 3:40 | **Live chain** | (a) Phone A: Rohan → **Yes** + note; hop 1 green, name appears, +10 Points. (b) Phone A: Vikram → **No**; red ✕, "Someone couldn't help — re-routing…", new path via the NGIT alum ’22 at 37.8%. "Aman will never know who said no." (c) Stage → "Show Priya QR"; a judge scans, plays Priya, taps **Yes**. (d) Phone B: Meera picks **15-min call**. Aman's screen: "Meera Iyer · 15-min call". |
 | 5:30 | **Points, Karz, dashboard** | `/live/leaderboard` re-orders live. `/live/college/ngit`: tiles, live feed, top helpers, data-residency card. |

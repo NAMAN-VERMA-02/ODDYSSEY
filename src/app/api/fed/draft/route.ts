@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { GoogleGenAI } from "@google/genai";
 import Anthropic from "@anthropic-ai/sdk";
-import { readLlmConfig } from "@/lib/llm/config";
+import { fedLlmConfig } from "@/lib/fed/llm";
 import { fail, getSession, loadDirectory, ok } from "@/lib/fed/server";
 
 const body = z.object({ target: z.string().min(3) });
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 Facts you may use: the senior is a ${title} at ${company}. The student studies at ${session.node.toUpperCase()} and is currently where the senior once was.
 Rules: one clear ask (15 minutes or one question). No flattery. Do not invent facts, names or numbers. Start with "Hi," and end with the placeholder {myName} on its own line as the signature. Output only the message.`;
 
-  const config = readLlmConfig();
+  const config = fedLlmConfig();
   if (config) {
     try {
       const work =

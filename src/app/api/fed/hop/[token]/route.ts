@@ -109,9 +109,12 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
 
   let overall: number | null = null;
   if (best) {
-    const edgeP = (a: string, b: string) => edges.find((e) => (e.a === a && e.b === b) || (e.a === b && e.b === a))?.p ?? 1;
+    // The hops already done are shown at their original chance, so the story reads 0.9 × 0.7 × 0.6 = 0.378
+    // (the live estimate in fed_graph moves slightly after every yes, which is right for routing but noisy to show).
     const chain = [intro.requester, ...accepted];
-    const done = chain.slice(0, -1).reduce((m, p, i) => m * edgeP(p, chain[i + 1]), 1);
+    const { data: priors } = await db.from("fed_edges").select("a, b, prior").in("a", chain).in("b", chain);
+    const priorOf = (a: string, b: string) => priors?.find((e) => (e.a === a && e.b === b) || (e.a === b && e.b === a))?.prior ?? 1;
+    const done = chain.slice(0, -1).reduce((m, p, i) => m * priorOf(p, chain[i + 1]), 1);
     overall = done * best.prob;
   }
   await db.rpc("fed_reroute", { p_intro: intro.id, p_tail: best?.path ?? null, p_prob: overall });

@@ -98,7 +98,8 @@ export function PathGraph({ people, edges, source, target, best, shortest = [], 
               pathLength={isBest ? 1 : undefined}
             />
             {(isBest || isShort) && (
-              <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 - 10} textAnchor="middle" fontSize="20" fontWeight="700" fill="var(--ink)" paintOrder="stroke" stroke="var(--paper)" strokeWidth="5">
+              // the comparison path's label sits nearer its start so it never lands on another person's name
+              <text x={a.x + (b.x - a.x) * (isBest ? 0.5 : 0.3)} y={a.y + (b.y - a.y) * (isBest ? 0.5 : 0.3) - 10} textAnchor="middle" fontSize="20" fontWeight="700" fill="var(--ink)" paintOrder="stroke" stroke="var(--paper)" strokeWidth="5">
                 {Math.round(e.p * 100)}%
               </text>
             )}

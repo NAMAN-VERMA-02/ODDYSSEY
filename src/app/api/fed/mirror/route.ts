@@ -44,10 +44,14 @@ export async function GET() {
   );
 
   const dir = await loadDirectory();
-  const matches = results
+  const ranked = results
     .flatMap(({ id, r }) => (r.ok ? r.data.map((m) => ({ ...m, node: id })) : []))
     .filter((m) => m.pid !== session.pid)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.score - a.score);
+  // "People who were where you are" means a real match (70%+). If a profile is unusual and fewer than
+  // three qualify, show the closest five instead of an empty screen.
+  const strong = ranked.filter((m) => m.score >= 0.7);
+  const matches = (strong.length >= 3 ? strong : ranked.slice(0, 5))
     .slice(0, 12)
     .map((m) => {
       const d = dir.get(m.pid);
