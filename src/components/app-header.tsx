@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
+import { NavBadgeLink } from "@/components/nav-badge-link";
 
-type NavLink = { href: string; label: string };
+type NavLink = { href: string; label: string; badge?: { countUrl: string; table: string } };
 
 /** Everyone gets the network pages; roles add the tools that belong to them. */
 function linksFor(role: string): NavLink[] {
@@ -9,6 +10,7 @@ function linksFor(role: string): NavLink[] {
     { href: "/people", label: "People" },
     { href: "/opportunities", label: "Opportunities" },
     { href: "/network", label: "Network" },
+    { href: "/messages", label: "Messages", badge: { countUrl: "/api/messages/unread", table: "messages" } },
   ];
   const own: NavLink[] =
     role === "student"
@@ -37,9 +39,13 @@ export function AppHeader({ role = "student" }: { role?: string }) {
 
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           {links.map((l) => (
-            <Link key={l.href} href={l.href} className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--paper)]">
-              {l.label}
-            </Link>
+            l.badge ? (
+              <NavBadgeLink key={l.href} href={l.href} label={l.label} {...l.badge} className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--paper)]" />
+            ) : (
+              <Link key={l.href} href={l.href} className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--paper)]">
+                {l.label}
+              </Link>
+            )
           ))}
         </nav>
 
@@ -52,9 +58,13 @@ export function AppHeader({ role = "student" }: { role?: string }) {
 
       <nav aria-label="Main" className="flex gap-2 overflow-x-auto px-1 py-3 md:hidden">
         {links.map((l) => (
-          <Link key={l.href} href={l.href} className="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm font-medium shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
-            {l.label}
-          </Link>
+          l.badge ? (
+            <NavBadgeLink key={l.href} href={l.href} label={l.label} {...l.badge} className="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm font-medium shadow-[0_0_0_1px_rgba(15,15,14,.08)]" />
+          ) : (
+            <Link key={l.href} href={l.href} className="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm font-medium shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
+              {l.label}
+            </Link>
+          )
         ))}
       </nav>
     </header>

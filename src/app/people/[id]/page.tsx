@@ -126,7 +126,14 @@ async function Person({ params }: { params: Promise<{ id: string }> }) {
               {isMe ? (
                 <Link href="/profile" className="rounded-full bg-[var(--ink)] px-5 py-2 text-sm font-semibold text-white">Edit your profile</Link>
               ) : (
-                <ConnectButton userId={p.id} initial={state} />
+                <div className="flex flex-wrap items-center gap-3">
+                  <ConnectButton userId={p.id} initial={state} />
+                  {state === "connected" && (
+                    <Link href={`/messages?with=${p.id}`} className="rounded-full border border-[var(--ink)] px-5 py-2 text-sm font-semibold transition-colors hover:bg-[var(--ink)] hover:text-white">
+                      Message
+                    </Link>
+                  )}
+                </div>
               )}
             </div>
           </div>
