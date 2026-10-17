@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -9,6 +10,7 @@ import { NewOpportunityForm } from "./new-form";
 export const metadata = { title: "Post an opportunity" };
 
 async function Gate() {
+  await connection(); // the session check reads the clock, so render per request
   const supabase = await createClient();
   const {
     data: { user },

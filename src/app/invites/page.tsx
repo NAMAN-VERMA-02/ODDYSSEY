@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
@@ -7,6 +8,7 @@ import { InvitesView } from "./invites-view";
 export const metadata = { title: "Invites" };
 
 async function Gate() {
+  await connection(); // the session check reads the clock, so render per request
   const supabase = await createClient();
   const {
     data: { user },

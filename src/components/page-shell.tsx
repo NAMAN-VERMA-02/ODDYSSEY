@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { AppHeader } from "@/components/app-header";
 import { Hero } from "@/components/hero";
 import { SiteFooter } from "@/components/site-footer";
@@ -12,6 +13,7 @@ type Props = {
 };
 
 async function Inner({ eyebrow, title, lede, children }: Props) {
+  await connection(); // the session check reads the clock, so render per request
   const supabase = await createClient();
   const {
     data: { user },

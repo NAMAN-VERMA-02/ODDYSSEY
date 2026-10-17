@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { CollegeDashboard } from "@/components/college/college-dashboard";
@@ -8,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata = { title: "College dashboard" };
 
 async function Stats() {
+  await connection(); // the session check reads the clock, so render per request
   const supabase = await createClient();
   const {
     data: { user },

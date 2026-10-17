@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -11,6 +12,7 @@ import { INTENT_LABELS, OPEN_TO_LABELS, type OpenTo } from "@/lib/validation/pro
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function Person({ params }: { params: Promise<{ id: string }> }) {
+  await connection(); // the session check reads the clock, so render per request
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 

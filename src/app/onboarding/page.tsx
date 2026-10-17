@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -8,6 +9,7 @@ import { JourneyForm, type InitialJourney } from "./journey-form";
 export const metadata = { title: "Your journey" };
 
 async function Journey() {
+  await connection(); // the session check reads the clock, so render per request
   const supabase = await createClient();
   const {
     data: { user },
