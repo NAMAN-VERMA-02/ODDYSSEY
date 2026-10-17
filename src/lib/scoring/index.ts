@@ -11,9 +11,11 @@ import { computeRarity, rarestTrait, rarityBonus } from "./rarity";
 import { isVisible, scoreTraits, type TraitKey, type Traits, type Visibility } from "./traits";
 
 export * from "./message";
+export * from "./payforward";
 export * from "./rank";
 export * from "./rarity";
 export * from "./routes";
+export * from "./rows";
 export * from "./traits";
 
 export type Candidate = {

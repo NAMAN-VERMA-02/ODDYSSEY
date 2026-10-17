@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { buildRouteMap, matchSeniors, type Candidate, type Outcome, type Traits } from "@/lib/scoring";
+import { buildRouteMap, chunks, matchSeniors, toTraits, type Candidate, type Outcome, type SnapshotRow } from "@/lib/scoring";
 
 const MAX_RESULTS = 30;
 const MAX_SENIORS = 2000;
@@ -9,35 +9,7 @@ const CHUNK = 150; // keeps `in (...)` URLs short
 
 const fail = (error: string, status: number) => NextResponse.json({ error }, { status });
 
-function chunks<T>(items: T[], size: number): T[][] {
-  const out: T[][] = [];
-  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
-  return out;
-}
-
 const escapeLike = (s: string) => s.replace(/[\\%_]/g, "\\$&");
-
-type SnapshotRow = {
-  user_id: string;
-  cgpa_range: string | null;
-  backlog_count: number;
-  tenth_range: string | null;
-  twelfth_range: string | null;
-  decision: string | null;
-  show_cgpa: boolean;
-  show_tenth: boolean;
-  show_twelfth: boolean;
-};
-
-const toTraits = (s: SnapshotRow, branch: string, tier: number): Traits => ({
-  collegeTier: tier,
-  cgpaRange: s.cgpa_range,
-  branch,
-  backlogCount: s.backlog_count,
-  tenthRange: s.tenth_range,
-  twelfthRange: s.twelfth_range,
-  decision: s.decision,
-});
 
 /** Past-self matches: seniors from the same college who were in the same semester. */
 export async function GET(request: NextRequest) {
