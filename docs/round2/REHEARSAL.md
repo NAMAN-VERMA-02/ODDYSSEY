@@ -35,4 +35,6 @@ Run twice in a row and record timings here.
 | 1 (live, functions in US East) | 2026-10-18 | 14/15 | Whole story worked; reset 14.5 s (limit 10 s) and steps took 3 to 10 s because Vercel ran in `iad1` while Supabase is in Mumbai and the nodes in Singapore. |
 | 2 (live, functions in Mumbai via `vercel.json`) | 2026-10-18 | 15/15 in 24 s | Reset 2.4 s, kill switch back in about 1 s, every step 0.4 to 2.5 s. Ask Setu ran in offline mode because the live app had no `LLM_API_KEY` yet. |
 
+| 3 (live, AI key set) | 2026-10-18 | 15/15 in 23 s | Reset 2.3 s, kill switch back in 0.8 s, Ask Setu in AI mode (2 MCP calls, 7 cards). Second clean run in a row. |
+
 Two things found only by running live: the Vercel region (fixed) and a stale `SUPABASE_SERVICE_ROLE_KEY` on Vercel that made every hub write fail with "Invalid API key" (fixed by pasting the right value). The reset now reads from the colleges before it clears the hub and reports its failure reason.
