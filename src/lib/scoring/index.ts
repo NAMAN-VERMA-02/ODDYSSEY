@@ -13,6 +13,7 @@ import { isVisible, scoreTraits, type TraitKey, type Traits, type Visibility } f
 export * from "./message";
 export * from "./rank";
 export * from "./rarity";
+export * from "./routes";
 export * from "./traits";
 
 export type Candidate = {

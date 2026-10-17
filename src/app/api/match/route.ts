@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { matchSeniors, type Candidate, type Traits } from "@/lib/scoring";
+import { buildRouteMap, matchSeniors, type Candidate, type Outcome, type Traits } from "@/lib/scoring";
 
 const MAX_RESULTS = 30;
 const MAX_SENIORS = 2000;
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
     .lt("batch", profile.batch)
     .neq("id", user.id)
     .limit(MAX_SENIORS);
-  if (!seniors?.length) return NextResponse.json({ semester, total: 0, bridgeBlocked, matches: [] });
+  if (!seniors?.length) return NextResponse.json({ semester, total: 0, bridgeBlocked, routeMap: buildRouteMap([]), matches: [] });
 
   const ids = seniors.map((s) => s.id as string);
   const nowIso = new Date().toISOString();
@@ -145,6 +145,27 @@ export async function GET(request: NextRequest) {
   });
 
   const all = matchSeniors(me, candidates, { semester });
+
+  // What the matched seniors did next, as counts only.
+  const matchedIds = all.map((m) => m.id);
+  const lastDecision = new Map<string, { semester: number; decision: string }>();
+  const goalCompanyOf = new Map<string, string>();
+  for (const part of chunks(matchedIds, CHUNK)) {
+    const [snaps, goals] = await Promise.all([
+      admin.from("snapshots").select("user_id, semester, decision").in("user_id", part).not("decision", "is", null),
+      admin.from("goals").select("user_id, company").in("user_id", part),
+    ]);
+    for (const r of snaps.data ?? []) {
+      const prev = lastDecision.get(r.user_id);
+      if (!prev || r.semester > prev.semester) lastDecision.set(r.user_id, { semester: r.semester, decision: r.decision });
+    }
+    for (const g of goals.data ?? []) if (g.company) goalCompanyOf.set(g.user_id, g.company);
+  }
+  const outcomes: Outcome[] = matchedIds.map((id) => ({
+    decision: lastDecision.get(id)?.decision ?? null,
+    company: goalCompanyOf.get(id) ?? null,
+  }));
+  const routeMap = buildRouteMap(outcomes);
   // A student with an open bridge request cannot start another one.
   const matches = (
     bridgeBlocked
@@ -155,5 +176,5 @@ export async function GET(request: NextRequest) {
       : all
   ).slice(0, MAX_RESULTS);
 
-  return NextResponse.json({ semester, total: all.length, bridgeBlocked, matches });
+  return NextResponse.json({ semester, total: all.length, bridgeBlocked, routeMap, matches });
 }
