@@ -1,5 +1,6 @@
 import type { Match, TraitKey } from "@/lib/scoring";
 import type { MatchResponse } from "@/lib/scoring/response";
+import { AgentDrafts } from "./agent-drafts";
 import { AskPanel } from "./ask-panel";
 import { RouteList, RouteMap, routeSentence } from "./route-map";
 
@@ -99,6 +100,8 @@ export function MatchResults({ data, demo }: { data: MatchResponse; demo?: boole
           You already have a request waiting on a bridging senior. You can ask others directly meanwhile.
         </p>
       )}
+
+      <AgentDrafts demo={demo} />
 
       <section aria-labelledby="who-h">
         <h2 id="who-h" className="mb-4 text-2xl font-black uppercase tracking-tight">
