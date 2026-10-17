@@ -100,7 +100,11 @@ export function neighbourhood(edges: BridgeEdge[], centres: string[], radius = 1
     for (const e of edges) {
       if (frontier.has(e.a) || frontier.has(e.b)) {
         kept.push(e);
-        for (const n of [e.a, e.b]) if (!seen.has(n)) (seen.add(n), nextFrontier.add(n));
+        for (const n of [e.a, e.b]) {
+          if (seen.has(n)) continue;
+          seen.add(n);
+          nextFrontier.add(n);
+        }
       }
     }
     frontier = nextFrontier;
