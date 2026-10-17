@@ -5,6 +5,7 @@ import { INTRO_SCRIPT } from "@/components/fx/intro-script";
 import { Preloader } from "@/components/fx/preloader";
 import { ScrollReveal } from "@/components/fx/scroll-reveal";
 import "./globals.css";
+import "./motion.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
