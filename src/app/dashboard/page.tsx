@@ -1,59 +1,61 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DashboardView, type DashboardData } from "@/components/dashboard/dashboard-view";
+import { isExpired } from "@/lib/asks/trust";
 import { createClient } from "@/lib/supabase/server";
-import { signOut } from "../(auth)/actions";
 
 export const metadata = { title: "Dashboard" };
 
-async function Profile() {
+async function Home() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("full_name, role, branch, batch, college_email_verified, colleges(name)")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, { count: semesters }, { data: asks }, { data: declines }, { count: answersReceived }] =
+    await Promise.all([
+      supabase
+        .from("users")
+        .select("full_name, role, branch, batch, college_email_verified, succeeded_at, help_owed")
+        .eq("id", user.id)
+        .single(),
+      supabase.from("snapshots").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      supabase.from("asks").select("asker_id, status, trust_step, expires_at, id").limit(200),
+      supabase.from("ask_declines").select("ask_id").eq("declined_by", user.id),
+      supabase.from("helps").select("id", { count: "exact", head: true }).eq("helped_id", user.id),
+    ]);
   if (!profile) redirect("/login?error=profile");
 
-  return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-12">
-      <h1 className="mb-2 text-4xl font-black uppercase tracking-tight">
-        Hello, {profile.full_name}
-      </h1>
-      <p className="mb-8 text-[var(--muted)] capitalize">
-        {profile.role} · {profile.branch} · batch {profile.batch}
-        {profile.college_email_verified ? " · college email verified" : ""}
-      </p>
-      <p className="mb-6">
-        <Link href="/matches" className="underline">See your matches</Link>{" · "}
-        <Link href="/requests" className="underline">Requests</Link>{" · "}
-        <Link href="/payitforward" className="underline">Pay it forward</Link>{" · "}
-        <Link href="/onboarding" className="underline">Edit your journey</Link>
-        {profile.role === "placement" && (
-          <>
-            {" · "}
-            <Link href="/college" className="underline">College dashboard</Link>
-          </>
-        )}
-      </p>
-      <form action={signOut}>
-        <button type="submit" className="rounded-full border border-[var(--ink)] px-6 py-2 font-semibold">
-          Log out
-        </button>
-      </form>
-    </main>
-  );
+  const declined = new Set((declines ?? []).map((d) => d.ask_id as string));
+  const sent = (asks ?? []).filter((a) => a.asker_id === user.id);
+  const received = (asks ?? []).filter((a) => a.asker_id !== user.id && !declined.has(a.id));
+
+  const data: DashboardData = {
+    fullName: profile.full_name,
+    role: profile.role,
+    branch: profile.branch,
+    batch: profile.batch,
+    verified: profile.college_email_verified,
+    answersReceived: answersReceived ?? 0,
+    state: {
+      role: profile.role,
+      semesters: semesters ?? 0,
+      sent: sent.length,
+      climbed: sent.some((a) => a.trust_step !== "question"),
+      waitingOnMe: received.filter((a) => a.status === "pending" && !isExpired(a.expires_at)).length,
+      succeeded: Boolean(profile.succeeded_at),
+      helpOwed: profile.help_owed,
+    },
+  };
+
+  return <DashboardView data={data} />;
 }
 
 export default function DashboardPage() {
   return (
     <Suspense>
-      <Profile />
+      <Home />
     </Suspense>
   );
 }
