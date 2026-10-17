@@ -27,3 +27,9 @@ export const ASK_LIFETIME_DAYS = 7;
 export function isExpired(expiresAt: string | Date, now: Date = new Date()): boolean {
   return new Date(expiresAt).getTime() <= now.getTime();
 }
+
+/** Whole days left before a request expires; 0 once it has. */
+export function daysLeft(expiresAt: string | Date, now: Date = new Date()): number {
+  const ms = new Date(expiresAt).getTime() - now.getTime();
+  return ms <= 0 ? 0 : Math.ceil(ms / (24 * 60 * 60 * 1000));
+}

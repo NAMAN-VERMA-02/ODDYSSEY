@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createAskSchema, patchAskSchema } from "@/lib/validation/asks";
 import { mapDbError } from "./errors";
 import { forwardUrl, generateToken, hashToken, isWellFormedToken } from "./token";
-import { canAdvance, isExpired, nextStep } from "./trust";
+import { canAdvance, daysLeft, isExpired, nextStep } from "./trust";
 
 describe("forward tokens", () => {
   it("are long, unique, URL-safe and hash deterministically", () => {
@@ -40,6 +40,15 @@ describe("trust ladder", () => {
     const now = new Date("2026-10-17T00:00:00Z");
     expect(isExpired("2026-10-17T00:00:00Z", now)).toBe(true);
     expect(isExpired("2026-10-17T00:00:01Z", now)).toBe(false);
+  });
+});
+
+describe("daysLeft", () => {
+  const now = new Date("2026-10-17T00:00:00Z");
+  it("rounds up to whole days and floors at zero", () => {
+    expect(daysLeft("2026-10-24T00:00:00Z", now)).toBe(7);
+    expect(daysLeft("2026-10-17T01:00:00Z", now)).toBe(1);
+    expect(daysLeft("2026-10-16T00:00:00Z", now)).toBe(0);
   });
 });
 
