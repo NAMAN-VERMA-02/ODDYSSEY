@@ -12,6 +12,9 @@ const PERSONAS = [
   { key: "vikram", label: "Vikram", note: "RCE alum, FinStack" },
   { key: "priya", label: "Priya", note: "NGIT alum ’22" },
   { key: "meera", label: "Meera", note: "RCE alum, FinStack" },
+  { key: "ananya", label: "Dr. Ananya", note: "Cardiologist, needs a developer", pro: true },
+  { key: "rahul", label: "Rahul", note: "CTO, health-IT company", pro: true },
+  { key: "ishaan", label: "Ishaan", note: "Developer who builds health apps", pro: true },
   { key: "ngit_pc", label: "NGIT placement cell", note: "college dashboard" },
   { key: "rce_pc", label: "RCE placement cell", note: "college dashboard" },
 ];
@@ -19,6 +22,7 @@ const PERSONAS = [
 const NODE_URL: Record<string, string | undefined> = {
   ngit: process.env.NEXT_PUBLIC_NODE_NGIT_URL,
   rce: process.env.NEXT_PUBLIC_NODE_RCE_URL,
+  pro: process.env.NEXT_PUBLIC_NODE_PRO_URL,
 };
 
 type AuditRow = { id: number; node_id: string | null; call: string; identifying_fields: number; note: string | null };
@@ -41,11 +45,12 @@ export function LiveHome() {
   }, [load]);
   useFedLive(["fed_audit"], load);
 
-  async function pick(key: string, placement: boolean) {
+  async function pick(key: string, placement: boolean, professional: boolean) {
     setBusy(key);
     const r = await api("/api/fed/persona", { method: "POST", json: { story_key: key } });
     setBusy("");
-    if (r.ok) router.push(placement ? `/live/college/${key.startsWith("rce") ? "rce" : "ngit"}` : "/live/mirror");
+    // students start at Mirror, professionals at Find, placement cells at their dashboard
+    if (r.ok) router.push(placement ? `/live/college/${key.startsWith("rce") ? "rce" : "ngit"}` : professional ? "/live/find" : "/live/mirror");
   }
 
   return (
@@ -53,17 +58,18 @@ export function LiveHome() {
       <section>
         <p className="text-base font-semibold uppercase tracking-wide text-[var(--muted)]">Federated by design</p>
         <h1 className="mt-2 text-5xl font-black uppercase leading-[0.95] tracking-tight sm:text-7xl">
-          Colleges keep their people.
+          Every network keeps its people.
           <br />
           <span className="font-serif font-normal normal-case italic">Setu only routes.</span>
         </h1>
+        <p className="mt-3 max-w-3xl text-xl text-[var(--muted)]">Two colleges and a professional network, each on its own server. A student, a doctor and a developer can all find each other without anyone handing over a database.</p>
       </section>
 
-      <section aria-label="College servers" className="grid gap-5 lg:grid-cols-3">
-        {(nodes.length ? nodes : [{ id: "ngit", name: "Northgate Institute of Technology", city: "Delhi", status: "unknown", latencyMs: null, people: 0 }, { id: "rce", name: "Riverbend College of Engineering", city: "Noida", status: "unknown", latencyMs: null, people: 0 }] as const).map((n) => (
+      <section aria-label="Servers" className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        {(nodes.length ? nodes : [{ id: "ngit", name: "Northgate Institute of Technology", city: "Delhi", status: "unknown", latencyMs: null, people: 0 }, { id: "rce", name: "Riverbend College of Engineering", city: "Noida", status: "unknown", latencyMs: null, people: 0 }, { id: "pro", name: "Setu Professionals", city: "Pan-India", status: "unknown", latencyMs: null, people: 0 }] as const).map((n) => (
           <article key={n.id} className="rounded-[22px] bg-[var(--surface)] p-6 shadow-[0_0_0_1px_rgba(15,15,14,.08)]" style={{ borderTop: `6px solid ${COLLEGE_COLOUR[n.id]}` }}>
             <div className="flex items-center justify-between">
-              <p className="text-sm font-bold uppercase tracking-wide text-[var(--muted)]">College server</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-[var(--muted)]">{n.id === "pro" ? "Professional server" : "College server"}</p>
               <NodePill id={n.id} status={n.status} label={n.status === "online" ? "ONLINE" : n.status === "unknown" ? "…" : "OFFLINE"} />
             </div>
             <h2 className="mt-3 text-3xl font-black leading-tight">{n.name}</h2>
@@ -115,7 +121,7 @@ export function LiveHome() {
               key={p.key}
               type="button"
               disabled={busy === p.key}
-              onClick={() => pick(p.key, p.key.endsWith("_pc"))}
+              onClick={() => pick(p.key, p.key.endsWith("_pc"), "pro" in p && p.pro === true)}
               className="rounded-2xl bg-[var(--surface)] p-5 text-left shadow-[0_0_0_1px_rgba(15,15,14,.08)] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
             >
               <span className="block text-xl font-black">{p.label}</span>

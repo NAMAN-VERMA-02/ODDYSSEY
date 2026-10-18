@@ -116,7 +116,7 @@ export async function ask(question: string): Promise<AskResult> {
   const offlineNodes = await offlineNodeIds();
   const configured = configuredNodes().filter((n) => !offlineNodes.has(n.id as NodeId));
   const connected = (await Promise.all(configured.map(connect))).filter((c): c is Connected => c !== null);
-  const offline = (["ngit", "rce"] as const).filter((id) => !connected.some((c) => c.cfg.id === id));
+  const offline = (["ngit", "rce", "pro"] as const).filter((id) => configuredNodes().some((n) => n.id === id) && !connected.some((c) => c.cfg.id === id));
 
   try {
     if (connected.length === 0) return { answer: "No college server is reachable right now.", trace: [], cards: [], mode: "offline", offline };

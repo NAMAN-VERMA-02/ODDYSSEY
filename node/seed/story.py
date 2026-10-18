@@ -6,6 +6,7 @@ Snapshot `sem` 1-8 is a semester; a value > 8 is a post-graduation year.
 NODE_NAMES = {
     "ngit": ("Northgate Institute of Technology", "Delhi"),
     "rce": ("Riverbend College of Engineering", "Noida"),
+    "pro": ("Setu Professionals", "Pan-India"),
 }
 
 

@@ -20,6 +20,26 @@ describe("offline router", () => {
   });
 });
 
+describe("professional needs", () => {
+  it("routes a plain-words need in any profession to match_need on every server", () => {
+    for (const q of ["I am a doctor and I need a developer for a patient app", "mujhe ek designer chahiye", "looking for a startup lawyer"]) {
+      const calls = planOffline(q);
+      expect(calls).toHaveLength(1);
+      expect(calls[0].tool).toBe("match_need");
+      expect(calls[0].args.need).toBe(q);
+    }
+  });
+  it("keeps company questions on find_helpers", () => {
+    expect(planOffline("NGIT ke kaunse alumni fintech ML mein madad kar sakte hain?").every((c) => c.tool === "find_helpers")).toBe(true);
+  });
+  it("turns match_need results into cards and labels professionals as such", () => {
+    const people = { college: "pro", people: [{ pid: "pro_aaaaaaaaaaaa", score: 0.91, title: "Full-stack & ML Developer", company: "Pulse Digital", grad_year: null }] };
+    const cards = extractCards("pro", people);
+    expect(cards[0]).toMatchObject({ pid: "pro_aaaaaaaaaaaa", title: "Full-stack & ML Developer", node: "pro" });
+    expect(templateAnswer(cards, {}, [])).toContain("Professional · Full-stack & ML Developer, Pulse Digital");
+  });
+});
+
 describe("cards and answer", () => {
   const helpers = { college: "ngit", helpers: [{ pid: "ngit_a", branch: "ECE", grad_year: 2022, title: "ML Engineer", company: "FinStack" }] };
   const matches = { college: "rce", matches: [{ pid: "rce_b", score: 0.9, now_title: "Data Scientist", now_company: "FinStack", outcome: "job" }] };

@@ -38,9 +38,13 @@ CREATE TABLE IF NOT EXISTS audit(
   identifying_fields INTEGER NOT NULL DEFAULT 0, detail TEXT);
 CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS releases(id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, pid TEXT NOT NULL, viewer_pid TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS profiles(
+  local_id TEXT PRIMARY KEY, domain TEXT, specialty TEXT, years_exp INTEGER, offers TEXT NOT NULL DEFAULT '[]',
+  needs TEXT NOT NULL DEFAULT '[]', open_to TEXT NOT NULL DEFAULT '[]', city TEXT, about TEXT);
 """
 
-ALL_TABLES = ["people", "snapshots", "edges", "reveals", "asks", "notes", "audit", "settings", "releases"]
+ALL_TABLES = ["people", "snapshots", "edges", "reveals", "asks", "notes", "audit", "settings", "releases", "profiles"]
+PUBLIC_ROLES = ("alum", "professional")  # roles whose job title and company are shown on their public card
 
 
 def utcnow() -> str:
@@ -186,8 +190,32 @@ class Store:
                 )
             for a, b, prior in ds["edges"]:
                 self.db.execute("INSERT INTO edges(a_local,b_local,prior) VALUES(?,?,?)", (a, b, prior))
+            for pr in ds.get("profiles", []):
+                self._insert_profile(pr["local_id"], pr)
             self.db.execute("INSERT OR REPLACE INTO settings(key,value) VALUES('hub_access','on')")
             self.db.commit()
+
+    # ------------------------------------------------------------ professional profiles
+    def _insert_profile(self, local_id: str, pr: dict):
+        self.db.execute(
+            "INSERT OR REPLACE INTO profiles(local_id,domain,specialty,years_exp,offers,needs,open_to,city,about)"
+            " VALUES(?,?,?,?,?,?,?,?,?)",
+            (local_id, pr.get("domain"), pr.get("specialty"), pr.get("years_exp"), json.dumps(pr.get("offers", [])),
+             json.dumps(pr.get("needs", [])), json.dumps(pr.get("open_to", [])), pr.get("city"), pr.get("about")),
+        )
+
+    def add_profile(self, local_id: str, pr: dict):
+        with self.lock:
+            self._insert_profile(local_id, pr)
+            self.db.commit()
+
+    def profile(self, local_id: str) -> dict | None:
+        r = self.one("SELECT * FROM profiles WHERE local_id=?", (local_id,))
+        if not r:
+            return None
+        for k in ("offers", "needs", "open_to"):
+            r[k] = json.loads(r.get(k) or "[]")
+        return r
 
     def ensure_seeded(self, dataset_factory):
         if self.count_people() == 0:
@@ -338,16 +366,21 @@ class Store:
             this = self.pid(p["local_id"])
             if pid and this != pid:
                 continue
-            is_alum = p["role"] == "alum"
+            is_public = p["role"] in PUBLIC_ROLES
+            # for a professional the "branch" slot carries the field they work in (for example "healthcare")
+            code = p["branch"]
+            if p["role"] == "professional":
+                prof = self.profile(p["local_id"])
+                code = prof["domain"] if prof else None
             out.append(
                 {
                     "pid": this,
                     "story_key": p["story_key"],
                     "role": p["role"],
-                    "branch_code": p["branch"],
+                    "branch_code": code,
                     "grad_year": p["grad_year"],
-                    "public_title": p["title"] if is_alum else None,
-                    "public_company": p["company"] if is_alum else None,
+                    "public_title": p["title"] if is_public else None,
+                    "public_company": p["company"] if is_public else None,
                     "open_to_intros": bool(p["open_to_intros"]),
                     "on_leaderboard": bool(p["on_leaderboard"]),
                 }
@@ -377,7 +410,7 @@ class Store:
             if first:
                 outcomes[first] = outcomes.get(first, 0) + 1
         companies = self.q(
-            "SELECT company, COUNT(*) c FROM people WHERE role='alum' AND company IS NOT NULL AND company<>'' "
+            "SELECT company, COUNT(*) c FROM people WHERE role IN ('alum','professional') AND company IS NOT NULL AND company<>'' "
             "GROUP BY company HAVING COUNT(*)>=2 ORDER BY c DESC, company"
         )
         per_year = {

@@ -412,7 +412,7 @@ def test_mcp_tools_list_and_calls(ngit):
     r = rpc(ngit, "tools/list")
     assert r.status_code == 200
     tools = {t["name"]: t for t in r.json()["result"]["tools"]}
-    assert set(tools) == {"college_stats", "find_helpers", "mirror_search", "get_timeline"}
+    assert set(tools) == {"college_stats", "find_helpers", "match_need", "mirror_search", "get_timeline"}
     assert all("[tool-spec v1]" in t["description"] for t in tools.values())
     assert r.headers["X-Setu-Identifying-Fields"] == "0"
 

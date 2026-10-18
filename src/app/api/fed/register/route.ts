@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     .neq("pid", pid)
     .neq("role", "placement")
     .limit(60);
-  const pool = (peers ?? []).filter((p) => p.role === "alum" || p.role === "student");
+  const pool = (peers ?? []).filter((p) => p.role === "alum" || p.role === "student" || p.role === "professional");
   const picks = pool.sort((a, b) => hash(pid + a.pid) - hash(pid + b.pid)).slice(0, 2);
   if (picks.length) {
     await db.from("fed_edges").upsert(

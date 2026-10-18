@@ -9,6 +9,7 @@ const TABS = [
   { id: "all", label: "All" },
   { id: "ngit", label: "NGIT" },
   { id: "rce", label: "RCE" },
+  { id: "pro", label: "Professionals" },
 ] as const;
 
 const ROW_H = 76;

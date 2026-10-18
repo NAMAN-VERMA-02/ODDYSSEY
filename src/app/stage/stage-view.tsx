@@ -9,8 +9,8 @@ type Hop = { id: string; idx: number; status: string; isTarget: boolean; storyKe
 type Intro = { id: string; requester: string; target: string; status: string; success_prob: number | null; hops: Hop[] };
 type State = { siteUrl: string; joinQr: boolean; priyaQr: boolean; intros: Intro[] };
 
-const NODE_URL: Record<string, string | undefined> = { ngit: process.env.NEXT_PUBLIC_NODE_NGIT_URL, rce: process.env.NEXT_PUBLIC_NODE_RCE_URL };
-const PERSONAS = ["aman", "rohan", "vikram", "priya", "meera"];
+const NODE_URL: Record<string, string | undefined> = { ngit: process.env.NEXT_PUBLIC_NODE_NGIT_URL, rce: process.env.NEXT_PUBLIC_NODE_RCE_URL, pro: process.env.NEXT_PUBLIC_NODE_PRO_URL };
+const PERSONAS = ["aman", "rohan", "vikram", "priya", "meera", "ananya", "rahul", "ishaan"];
 
 const btn = "rounded-xl bg-[var(--ink)] px-5 py-3 text-lg font-bold text-white disabled:opacity-50";
 const ghost = "rounded-xl border-2 border-[var(--ink)] px-5 py-3 text-lg font-bold disabled:opacity-50";

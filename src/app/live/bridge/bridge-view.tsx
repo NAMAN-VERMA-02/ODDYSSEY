@@ -201,7 +201,7 @@ function BridgeBody({ session, viewer }: { session: SessionInfo; viewer: ViewerT
             >
               <span className="block text-lg font-bold">{t.title ?? t.role}</span>
               <span className="text-base opacity-80">
-                {t.company} · {t.node.toUpperCase()} alum{t.gradYear ? ` ’${String(t.gradYear).slice(-2)}` : ""}
+                {t.company} · {t.role === "professional" ? "Setu Professionals" : `${t.node.toUpperCase()} alum${t.gradYear ? ` ’${String(t.gradYear).slice(-2)}` : ""}`}
                 {t.offline ? " · offline" : ""}
               </span>
             </button>

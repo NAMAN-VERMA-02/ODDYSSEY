@@ -1,11 +1,12 @@
 import "server-only";
 
-export const NODE_IDS = ["ngit", "rce"] as const;
+export const NODE_IDS = ["ngit", "rce", "pro"] as const;
 export type NodeId = (typeof NODE_IDS)[number];
 
-export const NODE_META: Record<NodeId, { name: string; city: string }> = {
-  ngit: { name: "Northgate Institute of Technology", city: "Delhi" },
-  rce: { name: "Riverbend College of Engineering", city: "Noida" },
+export const NODE_META: Record<NodeId, { name: string; city: string; kind: "college" | "professional" }> = {
+  ngit: { name: "Northgate Institute of Technology", city: "Delhi", kind: "college" },
+  rce: { name: "Riverbend College of Engineering", city: "Noida", kind: "college" },
+  pro: { name: "Setu Professionals", city: "Pan-India", kind: "professional" },
 };
 
 export type NodeConfig = {

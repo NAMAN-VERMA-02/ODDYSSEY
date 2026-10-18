@@ -15,8 +15,8 @@ for (const file of [ENV_FILE, ".env.local"]) {
   }
 }
 const STAGE = env.DEMO_STAGE_KEY;
-const NODE = { ngit: env.NEXT_PUBLIC_NODE_NGIT_URL ?? env.NODE_NGIT_URL, rce: env.NEXT_PUBLIC_NODE_RCE_URL ?? env.NODE_RCE_URL };
-const ADMIN = { ngit: env.NODE_NGIT_ADMIN_PASSWORD, rce: env.NODE_RCE_ADMIN_PASSWORD };
+const NODE = { ngit: env.NEXT_PUBLIC_NODE_NGIT_URL ?? env.NODE_NGIT_URL, rce: env.NEXT_PUBLIC_NODE_RCE_URL ?? env.NODE_RCE_URL, pro: env.NEXT_PUBLIC_NODE_PRO_URL ?? env.NODE_PRO_URL };
+const ADMIN = { ngit: env.NODE_NGIT_ADMIN_PASSWORD, rce: env.NODE_RCE_ADMIN_PASSWORD, pro: env.NODE_PRO_ADMIN_PASSWORD };
 
 class Jar {
   cookies = new Map();
@@ -59,18 +59,18 @@ const aman = new Jar();
 let introId;
 let target;
 
-await step("both colleges online", async () => {
-  const r = await new Jar().req("/api/fed/health");
-  assert(r.ok && r.data.nodes.every((n) => n.status === "online"), `status: ${JSON.stringify(r.data.nodes?.map((n) => [n.id, n.status]))}`);
-  return r.data.nodes.map((n) => `${n.id}=${n.latencyMs}ms`).join(" ");
-});
-
-await step("reset demo under 10 s", async () => {
+await step("reset demo under 10 s (also switches every server's hub access back on)", async () => {
   const s = Date.now();
   const r = await new Jar().req("/api/fed/admin/reset", { method: "POST", headers: stageHeaders });
   assert(r.ok, `reset failed: ${JSON.stringify(r.data)}`);
   assert(Date.now() - s < 10000, `took ${Date.now() - s} ms`);
   return `${r.data.people} people, ${r.data.edges} edges`;
+});
+
+await step("all three servers online", async () => {
+  const r = await new Jar().req("/api/fed/health");
+  assert(r.ok && r.data.nodes.length === 3 && r.data.nodes.every((n) => n.status === "online"), `status: ${JSON.stringify(r.data.nodes?.map((n) => [n.id, n.status]))}`);
+  return r.data.nodes.map((n) => `${n.id}=${n.latencyMs}ms`).join(" ");
 });
 
 let viewer;
@@ -198,6 +198,99 @@ await step("Hire: +100 to everyone who said yes", async () => {
   return `Aman still ${before.score}; top score ${lb[0].score}`;
 });
 
+// ---------------- the professional story: a doctor needs a developer ----------------
+const NEED = "I am a doctor and I need a developer to build a patient follow-up app";
+const doctor = new Jar();
+let docViewer;
+let ishaan;
+let docIntro;
+
+await step("Professional network is online and holds its own people", async () => {
+  const h = await new Jar().req("/api/fed/health");
+  const pro = h.data.nodes.find((n) => n.id === "pro");
+  assert(pro?.status === "online", `pro node is ${pro?.status}`);
+  assert(pro.people >= 40, `only ${pro.people} people`);
+  return `${pro.people} professionals, ${pro.latencyMs} ms`;
+});
+
+await step("Dr. Ananya picks her persona; her own words are read from the professional server", async () => {
+  const p = await doctor.req("/api/fed/persona", { method: "POST", json: { story_key: "ananya" } });
+  assert(p.ok, JSON.stringify(p.data));
+  const s = await doctor.req("/api/fed/session");
+  assert(s.data.session.role === "professional", `role is ${s.data.session.role}`);
+  docViewer = s.data.viewer;
+  const me = await fetch(`${docViewer.pro.url}/public/me`, { headers: { "x-setu-viewer": docViewer.pro.token } }).then((r) => r.json());
+  assert(/need a developer/.test(me.about) && me.needs.includes("software"), "her profile text did not come back from her own server");
+  const hubSees = JSON.stringify((await doctor.req("/api/fed/session")).data);
+  assert(!/need a developer|cardiac clinic/.test(hubSees), "the hub returned her private words");
+});
+
+await step("Find: a plain-words need returns the health-app developer first, from the whole network", async () => {
+  const r = await doctor.req("/api/fed/match", { method: "POST", json: { query: NEED } });
+  assert(r.ok, JSON.stringify(r.data));
+  const top = r.data.results[0];
+  assert(/Developer/.test(top.title ?? ""), `top result is ${top.title}`);
+  assert(top.percent >= 85, `top match only ${top.percent}%`);
+  assert(r.data.searched.length === 3 && r.data.searched.every((s) => s.ok), `searched ${JSON.stringify(r.data.searched)}`);
+  assert(!r.data.results.some((x) => /Cardiologist|Physician|Surgeon/.test(x.title ?? "")), "doctors came back for a request for a developer");
+  assert(!/Ishaan|Kapoor/.test(JSON.stringify(r.data)), "a name leaked through Find");
+  ishaan = top.pid;
+  return `${top.title}, ${top.company} ${top.percent}%; warmest route ${top.route ? Math.round(top.route.chance * 1000) / 10 + "%" : "none"}`;
+});
+
+await step("Bridge for the doctor: through a trusted CTO 59.5% vs a cold message 20%", async () => {
+  const r = await doctor.req(`/api/fed/route?target=${ishaan}`);
+  assert(r.data.status === "ok", JSON.stringify(r.data));
+  assert(Math.abs(r.data.best.prob - 0.595) < 0.002, `best ${r.data.best.prob}`);
+  assert(r.data.best.path.length === 3, `best path has ${r.data.best.path.length} people`);
+  assert(r.data.shortest.path.length === 2 && Math.abs(r.data.shortest.prob - 0.2) < 0.002, `shortest ${JSON.stringify(r.data.shortest)}`);
+});
+
+await step("Doctor sends the intro; the CTO and the developer both say yes", async () => {
+  const sent = await doctor.req("/api/fed/intro", { method: "POST", json: { target: ishaan, trust_step: "call" } });
+  assert(sent.ok && sent.data.intro_id, JSON.stringify(sent.data));
+  docIntro = sent.data.intro_id;
+  const ask = await fetch(`${docViewer.pro.url}/public/asks`, { method: "POST", headers: { "content-type": "application/json", "x-setu-viewer": docViewer.pro.token }, body: JSON.stringify({ intro_id: docIntro, text: "I run a cardiac clinic and need a patient follow-up app. Could we talk for 15 minutes?", work_url: null }) });
+  assert(ask.ok, `professional server refused the ask: ${ask.status}`);
+  await act("rahul", true, undefined, "Ananya is a great doctor. Ishaan, worth a call.");
+  const mid = await doctor.req(`/api/fed/intro/${docIntro}`);
+  assert(mid.data.hops.find((h) => h.status === "sent")?.is_target, "the developer was not asked after the CTO said yes");
+  await act("ishaan", true, "call");
+  const done = await doctor.req(`/api/fed/intro/${docIntro}`);
+  assert(done.data.intro.status === "delivered" && done.data.intro.response === "call", `${done.data.intro.status}/${done.data.intro.response}`);
+});
+
+await step("Doctor now reads both names and the note straight from the professional server", async () => {
+  const s = await doctor.req(`/api/fed/intro/${docIntro}`);
+  const accepted = s.data.hops.filter((h) => h.status === "accepted").map((h) => h.to_pid);
+  const cards = await fetch(`${s.data.viewer.pro.url}/public/cards`, { method: "POST", headers: { "content-type": "application/json", "x-setu-viewer": s.data.viewer.pro.token }, body: JSON.stringify({ pids: accepted }) }).then((r) => r.json());
+  const names = cards.filter((c) => c.name).map((c) => c.name);
+  assert(names.includes("Rahul Desai") && names.includes("Ishaan Kapoor"), `names: ${names.join(", ")}`);
+  const ask = await fetch(`${s.data.viewer.pro.url}/public/asks/${docIntro}`, { headers: { "x-setu-viewer": s.data.viewer.pro.token } }).then((r) => r.json());
+  assert(ask.notes.some((n) => /worth a call/.test(n.text)), "the CTO's note did not arrive");
+  const hub = JSON.stringify(s.data);
+  assert(!/Rahul Desai|Ishaan Kapoor|worth a call|cardiac clinic/.test(hub), "the hub holds a name or message");
+  return names.join(", ");
+});
+
+await step("A professional joins from a phone and can immediately find help", async () => {
+  const lawyer = new Jar();
+  const j = await fetch(`${NODE.pro}/public/join`, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: HUB },
+    body: JSON.stringify({ name: "Test Architect", role: "professional", domain: "operations", title: "Architect", company: "Studio Nine", years_exp: 10, city: "Jaipur", offers: ["operations"], needs: ["software"], open_to: ["intros"], about: "I need a developer for a site-inspection app.", open_to_intros: true, on_leaderboard: true, is_18_plus: true }),
+  });
+  const body = await j.json();
+  assert(j.ok && body.pid, `professional server refused: ${JSON.stringify(body)}`);
+  const reg = await lawyer.req("/api/fed/register", { method: "POST", json: { pid: body.pid, node: "pro" } });
+  assert(reg.ok, JSON.stringify(reg.data));
+  const f = await lawyer.req("/api/fed/match", { method: "POST", json: { query: "I need a developer for an inspection app" } });
+  assert(f.ok && f.data.results.length > 0, "a new professional found nobody");
+  const m = await lawyer.req("/api/fed/mirror");
+  assert(m.ok && m.data.notStudent === true, "Mirror should tell a professional to use Find");
+  return `${f.data.results.length} results, route to the best: ${f.data.results[0].route ? "yes" : "none yet"}`;
+});
+
 async function adminAccess(node, on) {
   const r = await fetch(`${NODE[node]}/admin/hub-access`, { method: "POST", headers: { "content-type": "application/json", "x-admin-password": ADMIN[node] ?? "admin" }, body: JSON.stringify({ on }) });
   assert(r.ok, `admin toggle failed: ${r.status}`);
@@ -244,6 +337,18 @@ await step("Ask Setu returns a trace from both colleges", async () => {
   assert(nodes.has("ngit") && nodes.has("rce"), `trace only covers ${[...nodes]}`);
   assert(r.data.trace.every((t) => t.identifyingFields === 0), "a tool call reported identifying fields");
   return `${r.data.mode} mode, ${r.data.trace.length} calls, ${r.data.cards.length} cards`;
+});
+
+await step("Ask Setu: a plain-words need in any profession reaches every server over MCP", async () => {
+  const r = await new Jar().req("/api/fed/ask", { method: "POST", json: { question: "I am a doctor and I need a developer to build a patient follow-up app" } });
+  assert(r.ok, JSON.stringify(r.data));
+  const tools = new Set(r.data.trace.map((t) => t.tool));
+  const nodes = new Set(r.data.trace.filter((t) => t.tool === "match_need").map((t) => t.node));
+  assert(tools.has("match_need"), `tools used: ${[...tools]}`);
+  assert(nodes.has("pro"), `match_need reached ${[...nodes]}`);
+  assert(r.data.trace.every((t) => t.identifyingFields === 0), "a tool call reported identifying fields");
+  assert(r.data.cards.some((c) => /Developer/.test(c.title ?? "")), "no developer came back");
+  return `${r.data.mode} mode, match_need on ${[...nodes].join("+")}`;
 });
 
 const failed = results.filter((r) => !r.ok);

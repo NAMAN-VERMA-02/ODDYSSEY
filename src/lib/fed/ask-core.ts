@@ -18,6 +18,12 @@ export function planOffline(question: string): PlannedCall[] {
 
   if (/\b(stats|statistics|kitne|how many|count|total|numbers?)\b/.test(q)) calls.push({ tool: "college_stats", args: {} });
 
+  // "I need a developer", "mujhe ek designer chahiye": a plain-words need goes to the matcher on every server
+  if (/\b(need|looking for|want|hire|chahiye|zaroorat|dhundh|dhoondh)\b/.test(q) && /developer|coder|programmer|designer|lawyer|doctor|accountant|marketer|engineer|founder|teacher|researcher|analyst/.test(q)) {
+    calls.push({ tool: "match_need", args: { need: question.slice(0, 300), limit: 5 } });
+    return calls;
+  }
+
   const companies = COMPANIES.filter((c) => q.includes(c.toLowerCase()));
   if (/fintech|finance|payments?/.test(q)) companies.push(...FINTECH.filter((c) => !companies.includes(c)));
   const branch = BRANCHES.find((b) => new RegExp(`\\b${b.toLowerCase()}\\b`).test(q));
@@ -37,7 +43,11 @@ type Json = Record<string, unknown>;
 /** Turns a tool result into pseudonymous cards. `helpers` and `matches` are the two list shapes the nodes return. */
 export function extractCards(node: string, result: Json | null): AskCard[] {
   if (!result) return [];
-  const rows = [...((result.helpers as Json[] | undefined) ?? []), ...((result.matches as Json[] | undefined) ?? [])];
+  const rows = [
+    ...((result.helpers as Json[] | undefined) ?? []),
+    ...((result.matches as Json[] | undefined) ?? []),
+    ...((result.people as Json[] | undefined) ?? []), // from match_need
+  ];
   return rows
     .filter((r) => typeof r.pid === "string")
     .map((r) => ({
@@ -57,15 +67,17 @@ export function dedupeCards(cards: AskCard[]): AskCard[] {
   return cards.filter((c) => (seen.has(c.pid) ? false : (seen.add(c.pid), true)));
 }
 
+const nodeName = (n: string) => (n === "pro" ? "Professional network" : n.toUpperCase());
+
 export function cardLine(c: AskCard): string {
-  const who = `${c.node.toUpperCase()} alum${c.gradYear ? ` ’${String(c.gradYear).slice(-2)}` : ""}`;
+  const who = c.node === "pro" ? "Professional" : `${c.node.toUpperCase()} alum${c.gradYear ? ` ’${String(c.gradYear).slice(-2)}` : ""}`;
   const what = [c.title, c.company].filter(Boolean).join(", ");
   return what ? `${who} · ${what}` : who;
 }
 
 /** The answer used in offline mode. Never names anyone: results are pseudonymous. */
 export function templateAnswer(cards: AskCard[], statsByNode: Record<string, unknown>, offline: string[]): string {
-  const colleges = [...new Set(cards.map((c) => c.node.toUpperCase()))];
+  const colleges = [...new Set(cards.map((c) => nodeName(c.node)))];
   const parts: string[] = [];
   if (cards.length) {
     parts.push(`Found ${cards.length} ${cards.length === 1 ? "person" : "people"} across ${colleges.join(" and ")} who can help:`);
@@ -77,7 +89,7 @@ export function templateAnswer(cards: AskCard[], statsByNode: Record<string, unk
   } else {
     parts.push("I could not find anyone matching that. Try naming a company, a branch like ECE, or a goal like ML.");
   }
-  if (offline.length) parts.push(`${offline.map((n) => n.toUpperCase()).join(", ")} is offline, so its people are not included.`);
+  if (offline.length) parts.push(`${offline.map(nodeName).join(", ")} is offline, so its people are not included.`);
   return parts.join("\n");
 }
 

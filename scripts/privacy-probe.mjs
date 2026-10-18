@@ -14,10 +14,9 @@ for (const file of [process.argv[3] ?? ".env.local", ".env.local"]) {
     if (m && env[m[1]] === undefined) env[m[1]] = m[2];
   }
 }
-const NODE = { ngit: env.NEXT_PUBLIC_NODE_NGIT_URL, rce: env.NEXT_PUBLIC_NODE_RCE_URL };
+const NODE = { ngit: env.NEXT_PUBLIC_NODE_NGIT_URL, rce: env.NEXT_PUBLIC_NODE_RCE_URL, ...(env.NEXT_PUBLIC_NODE_PRO_URL ? { pro: env.NEXT_PUBLIC_NODE_PRO_URL } : {}) };
 const SUPA = env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const STAGE = env.DEMO_STAGE_KEY;
 
 let failed = 0;
 async function check(name, fn) {
@@ -48,7 +47,7 @@ const forgedViewer = (pid, secret = "not-the-real-secret") => {
   const payload = Buffer.from(JSON.stringify({ pid, exp: Math.floor(Date.now() / 1000) + 3600 })).toString("base64url");
   return `${payload}.${createHmac("sha256", secret).update(payload).digest("base64url")}`;
 };
-const NAMES = /Aman|Rohan|Priya|Meera|Vikram|Karan|Arjun|Kavya|Sneha|Khanna|Mehta|Sharma|Iyer|Nair|Bhatia|Malhotra|Reddy|Joshi/;
+const NAMES = /Aman|Rohan|Priya|Meera|Vikram|Karan|Arjun|Kavya|Sneha|Khanna|Mehta|Sharma|Iyer|Nair|Bhatia|Malhotra|Reddy|Joshi|Ananya|Rahul|Ishaan|Meenakshi|Zoya|Desai|Kapoor|Neha Verma/;
 
 // ---------------- college nodes ----------------
 for (const [id, base] of Object.entries(NODE)) {

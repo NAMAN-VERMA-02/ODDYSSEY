@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export type NodeId = "ngit" | "rce";
+export type NodeId = "ngit" | "rce" | "pro";
 export type NodeState = { id: NodeId; name: string; city: string; status: "online" | "offline" | "revoked" | "unknown"; latencyMs: number | null; people: number };
 export type SessionInfo = {
   pid: string;
@@ -154,7 +154,7 @@ export function useNames(viewer: ViewerTokens, pids: string[]) {
   return names;
 }
 
-export const COLLEGE_COLOUR: Record<string, string> = { ngit: "#3b82f6", rce: "#f59e0b" };
+export const COLLEGE_COLOUR: Record<string, string> = { ngit: "#3b82f6", rce: "#f59e0b", pro: "#10b981" };
 
 export function collegeOf(pid: string): NodeId {
   return pid.split("_")[0] as NodeId;

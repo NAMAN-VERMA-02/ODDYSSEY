@@ -28,6 +28,8 @@ const key = (a: string, b: string) => `${a}|${b}`;
 
 function shortLabel(p: GraphPerson, name?: string): string {
   if (name) return name.split(" ")[0];
+  // a professional has no graduation year: show their role instead ("Cardiologist", "CTO")
+  if (p.role === "professional") return (p.title ?? "Professional").split(/[\s&]/)[0];
   const yr = p.gradYear ? ` ’${String(p.gradYear).slice(-2)}` : "";
   return `${p.node.toUpperCase()}${yr}`;
 }
@@ -124,7 +126,7 @@ export function PathGraph({ people, edges, source, target, best, shortest = [], 
             {acceptedHere && <circle cx={at.x} cy={at.y} r={40} fill="none" stroke="#22c55e" strokeWidth="3" opacity="0.5" />}
             <circle cx={at.x} cy={at.y} r={30} fill="var(--surface)" stroke={ring} strokeWidth={best.includes(p.pid) ? 6 : 3} />
             <text x={at.x} y={at.y + 8} textAnchor="middle" fontSize="22" fontWeight="900" fill="var(--ink)">
-              {isSource ? "YOU" : p.pid === target ? "★" : acceptedHere ? "✓" : p.role === "alum" ? "A" : "S"}
+              {isSource ? "YOU" : p.pid === target ? "★" : acceptedHere ? "✓" : p.role === "alum" ? "A" : p.role === "professional" ? "P" : "S"}
             </text>
             <text x={at.x} y={at.y + 56} textAnchor="middle" fontSize="20" fontWeight="700" fill="var(--ink)">
               {shortLabel(p, names[p.pid])}

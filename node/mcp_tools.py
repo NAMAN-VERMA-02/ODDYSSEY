@@ -7,6 +7,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import CallToolResult, TextContent
 
+import match
 import mirror
 
 TOOL_SPEC_VERSION = "v1"
@@ -27,6 +28,11 @@ TOOL_DESCRIPTIONS = {
         "[tool-spec v1] Read-only. Given a student's branch, semester, cgpa, internship flag, project and hackathon counts, "
         "skills and goal, return the alumni who looked most like them at the same semester, with a score, the rarest trait "
         "they share, and where those alumni are now. Pseudonymous ids only."
+    ),
+    "match_need": (
+        "[tool-spec v1] Read-only. Describe in plain words who you need (for example 'a developer who has built health "
+        "apps' or 'a startup lawyer') and get the people on this server who offer that, ranked, with the reasons. Works "
+        "across professions: a doctor can find a developer. Pseudonymous ids and public job cards only, never names."
     ),
     "get_timeline": (
         "[tool-spec v1] Read-only. Semester-by-semester and post-graduation timeline for one pseudonymous id: label, "
@@ -94,6 +100,15 @@ def build_mcp(ctx) -> FastMCP:
             )
         rows.sort(key=lambda r: (-(r["grad_year"] or 0), r["pid"]))
         return _ok({"college": ctx.cfg.college_id, "helpers": rows[: max(1, min(int(limit), 25))]})
+
+    @mcp.tool(name="match_need", description=TOOL_DESCRIPTIONS["match_need"])
+    def match_need(need: str, limit: int = 5) -> CallToolResult:
+        if (e := gate()) is not None:
+            return e
+        if not need.strip():
+            return _err("Say who you need, in a few words")
+        rows = match.rank(store, need[:300], None, max(1, min(int(limit), 15)))
+        return _ok({"college": ctx.cfg.college_id, "people": rows})
 
     @mcp.tool(name="mirror_search", description=TOOL_DESCRIPTIONS["mirror_search"])
     def mirror_search(

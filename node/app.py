@@ -25,10 +25,18 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 from starlette.datastructures import Headers, MutableHeaders
 
+import match
 import mirror
+import taxonomy
 from mcp_tools import build_mcp
 from seed import generate, story
-from store import Store, grad_year_for_sem, utcnow, verify_viewer
+from seed import pro as pro_seed
+from store import PUBLIC_ROLES, Store, grad_year_for_sem, utcnow, verify_viewer
+
+
+def dataset_for(college_id: str) -> dict:
+    """The seed data for this node: the professional node has its own, colleges use the generator."""
+    return pro_seed.build() if college_id == "pro" else generate.build(college_id)
 
 VERSION = "1.0.0"
 HERE = Path(__file__).parent
@@ -148,7 +156,7 @@ class Ctx:
     def __init__(self, cfg: Config):
         self.cfg = cfg
         self.store = Store(cfg.db_path, cfg.college_id, cfg.node_secret)
-        self.store.ensure_seeded(lambda: generate.build(cfg.college_id))
+        self.store.ensure_seeded(lambda: dataset_for(cfg.college_id))
         self.limiter = RateLimiter(10, 60.0)
 
 
@@ -229,11 +237,20 @@ class AuditMiddleware:
 # ---------------------------------------------------------------- request models
 class JoinBody(BaseModel):
     name: str = Field(min_length=1, max_length=80)
-    role: Literal["student", "alum"]
-    branch: Literal["CSE", "IT", "ECE", "ME", "AIML"]
+    role: Literal["student", "alum", "professional"]
+    # students and alumni give a branch and CGPA; professionals give a field, offers and needs instead
+    branch: Literal["CSE", "IT", "ECE", "ME", "AIML"] | None = None
     sem: int | None = Field(None, ge=1, le=8)
     grad_year: int | None = Field(None, ge=1990, le=2040)
-    cgpa: float = Field(ge=0, le=10)
+    cgpa: float | None = Field(None, ge=0, le=10)
+    domain: str | None = Field(None, max_length=30)
+    specialty: str | None = Field(None, max_length=80)
+    years_exp: int | None = Field(None, ge=0, le=60)
+    offers: list[str] = Field(default_factory=list, max_length=8)
+    needs: list[str] = Field(default_factory=list, max_length=8)
+    open_to: list[str] = Field(default_factory=list, max_length=6)
+    city: str | None = Field(None, max_length=60)
+    about: str | None = Field(None, max_length=400)
     internship: bool = False
     projects: int = Field(0, ge=0, le=50)
     hackathons: int = Field(0, ge=0, le=50)
@@ -276,6 +293,13 @@ class MirrorBody(BaseModel):
 class RevealBody(BaseModel):
     pid: str
     viewer_pids: list[str] = Field(max_length=500)
+
+
+class MatchBody(BaseModel):
+    query: str = Field("", max_length=300)
+    tags: list[str] = Field(default_factory=list, max_length=8)
+    limit: int = Field(6, ge=1, le=25)
+    exclude_pid: str | None = None
 
 
 class ReverseBody(BaseModel):
@@ -370,6 +394,12 @@ def create_app(cfg: Config | None = None, **overrides) -> FastAPI:
     def join(request: Request, body: JoinBody, _=Depends(write_limit)):
         if not body.is_18_plus:
             raise ApiError(400, "must_be_18_plus")
+        if body.role == "professional":
+            return join_professional(request, body)
+        if body.branch is None:
+            raise ApiError(400, "branch_required")
+        if body.cgpa is None:
+            raise ApiError(400, "cgpa_required")
         if body.role == "student" and body.sem is None:
             raise ApiError(400, "sem_required")
         if body.role == "alum" and body.grad_year is None:
@@ -406,10 +436,43 @@ def create_app(cfg: Config | None = None, **overrides) -> FastAPI:
         pid = store.pid(lid)
         return respond(request, {"pid": pid, "public_card": store.directory(pid)[0]}, idf=0, action="join")
 
+    def join_professional(request: Request, body: JoinBody):
+        """A professional joins this node directly: no college, no CGPA. Offers and needs use the shared tags."""
+        domain = (body.domain or "").lower()
+        if domain not in taxonomy.DOMAINS:
+            raise ApiError(400, "domain_required")
+        if not (body.title or "").strip():
+            raise ApiError(400, "title_required")
+        offers = [t for t in dict.fromkeys(o.lower() for o in body.offers) if t in taxonomy.DOMAINS]
+        needs = [t for t in dict.fromkeys(n.lower() for n in body.needs) if t in taxonomy.DOMAINS]
+        open_to = [t for t in dict.fromkeys(o.lower() for o in body.open_to) if t in taxonomy.OPEN_TO]
+        if not offers:
+            offers = [domain]
+        title, company = body.title.strip(), (body.company or "").strip() or None
+        years = body.years_exp if body.years_exp is not None else 0
+        lid = "join-" + uuid.uuid4().hex[:12]
+        headline = f"{title} at {company} · {taxonomy.DOMAIN_LABEL[domain]}" if company else f"{title} · {taxonomy.DOMAIN_LABEL[domain]}"
+        start = max(2026 - years, 1970)
+        snaps = [
+            {"local_id": lid, "sem": start, "year": start, "cgpa": None, "internship": 0, "projects": 0, "hackathons": 0,
+             "skills": [], "label": f"Started in {taxonomy.DOMAIN_LABEL[domain].lower()}"},
+            {"local_id": lid, "sem": 2025, "year": 2025, "cgpa": None, "internship": 0, "projects": 0, "hackathons": 0,
+             "skills": [], "decision": "job", "org": company, "label": f"{title}" + (f" at {company}" if company else "")},
+        ]
+        store.add_person({
+            "local_id": lid, "name": body.name.strip(), "role": "professional", "branch": None, "grad_year": None,
+            "current_sem": None, "cgpa": None, "skills": [], "goal": None, "company": company, "title": title,
+            "headline": headline, "open_to_intros": body.open_to_intros, "on_leaderboard": body.on_leaderboard,
+        }, snaps)
+        store.add_profile(lid, {"domain": domain, "specialty": (body.specialty or title)[:80], "years_exp": years,
+                                "offers": offers, "needs": needs, "open_to": open_to, "city": body.city, "about": body.about})
+        pid = store.pid(lid)
+        return respond(request, {"pid": pid, "public_card": store.directory(pid)[0]}, idf=0, action="join:professional")
+
     def masked_card(p: dict) -> dict:
+        public = p["role"] in PUBLIC_ROLES
         return {"pid": store.pid(p["local_id"]), "name": None, "headline": None,
-                "title": p["title"] if p["role"] == "alum" else None,
-                "company": p["company"] if p["role"] == "alum" else None,
+                "title": p["title"] if public else None, "company": p["company"] if public else None,
                 "branch": p["branch"], "grad_year": p["grad_year"], "masked": True}
 
     def full_card(p: dict) -> dict:
@@ -453,8 +516,13 @@ def create_app(cfg: Config | None = None, **overrides) -> FastAPI:
         p = store.person_by_pid(viewer)
         if not p:
             raise ApiError(404, "not_found")
-        return respond(request, {"pid": viewer, "skills": p["skills"], "goal": p["goal"],
-                                 "sem": p["current_sem"], "branch": p["branch"]}, action="me")
+        data = {"pid": viewer, "skills": p["skills"], "goal": p["goal"], "sem": p["current_sem"], "branch": p["branch"]}
+        if p["role"] == "professional":
+            # your own words about what you offer and need: read on your own device, to prefill your search
+            prof = store.profile(p["local_id"]) or {}
+            data["role"] = "professional"
+            data.update({k: prof.get(k) for k in ("domain", "offers", "needs", "open_to", "city", "about", "years_exp")})
+        return respond(request, data, action="me")
 
     @app.post("/public/asks")
     def post_ask(request: Request, body: AskBody, _=Depends(write_limit)):
@@ -514,6 +582,11 @@ def create_app(cfg: Config | None = None, **overrides) -> FastAPI:
                                    body.goal_tag, body.limit)
         return respond(request, rows)
 
+    @app.post("/match")
+    def match_ep(request: Request, body: MatchBody, _=Depends(hub_guard)):
+        """Who here can help with this need? Public fields only: field, title, company, offer tags, reasons."""
+        return respond(request, match.rank(store, body.query, body.tags, body.limit, body.exclude_pid))
+
     @app.get("/timeline/{pid}")
     def timeline(pid: str, request: Request, _=Depends(hub_guard)):
         p = store.person_by_pid(pid)
@@ -541,7 +614,7 @@ def create_app(cfg: Config | None = None, **overrides) -> FastAPI:
 
     # ================================================================ admin console
     def do_reset():
-        store.reseed(lambda: generate.build(cfg.college_id))
+        store.reseed(lambda: dataset_for(cfg.college_id))
         ctx.limiter.reset()
 
     @app.post("/admin/reset")

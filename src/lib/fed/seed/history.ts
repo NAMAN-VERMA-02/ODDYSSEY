@@ -39,6 +39,12 @@ export const STORY_LEDGER: Record<string, { points: number; karz: number }> = {
   arjun: { points: 2310, karz: 0 },
   kavya: { points: 1875, karz: 0 },
   sneha: { points: 610, karz: 40 },
+  // the professional network's story people
+  ananya: { points: 120, karz: 30 },
+  rahul: { points: 640, karz: 0 },
+  ishaan: { points: 310, karz: 20 },
+  meenakshi: { points: 420, karz: 0 },
+  zoya: { points: 260, karz: 10 },
 };
 
 type Week = { total: number; hired: number; delivered: number; declinedSecond: number; declinedFirst: number };
@@ -138,7 +144,7 @@ export function buildHistory(people: DirPerson[], now: Date): { intros: HistoryI
       if (story.points) ledger.push({ pid: p.pid, points: story.points, karz: 0, reason: "history" });
       if (story.karz) ledger.push({ pid: p.pid, points: 0, karz: story.karz, reason: "history" });
     } else if (!p.story_key) {
-      const points = p.role === "alum" ? Math.floor(random() * 480) : Math.floor(random() * 220);
+      const points = p.role === "alum" || p.role === "professional" ? Math.floor(random() * 480) : Math.floor(random() * 220);
       const karz = p.role === "student" ? Math.floor(random() * 60) : 0;
       if (points) ledger.push({ pid: p.pid, points, karz: 0, reason: "history" });
       if (karz) ledger.push({ pid: p.pid, points: 0, karz, reason: "history" });

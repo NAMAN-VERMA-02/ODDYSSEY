@@ -56,7 +56,7 @@ export function IntroView({ paramsPromise }: { paramsPromise: Promise<{ id: stri
   const names = useNames(viewer, nameable);
 
   // notes live on the requester's own college server; read them straight from there
-  const requesterNode = data?.intro.requester.split("_")[0] as "ngit" | "rce" | undefined;
+  const requesterNode = data?.intro.requester.split("_")[0] as "ngit" | "rce" | "pro" | undefined;
   const eventCount = data?.events.length ?? 0;
   useEffect(() => {
     const v = requesterNode ? viewer[requesterNode] : undefined;

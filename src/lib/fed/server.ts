@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import type { BridgeEdge } from "./bridge";
 import { configuredNodes, NODE_META, nodeConfig, secret, type NodeId, NODE_IDS } from "./config";
 import { fedDb } from "./db";
+import { DOMAIN_LABEL } from "./taxonomy";
 import { mintViewerToken, SESSION_COOKIE, signSession, verifySession, type FedSession } from "./tokens";
 
 export type DirRow = {
@@ -105,8 +106,12 @@ export function publicCard(d: DirRow) {
   };
 }
 
-export function cardLabel(d: Pick<DirRow, "node_id" | "role" | "grad_year" | "public_title" | "public_company">): string {
-  const who = `${d.node_id.toUpperCase()} ${d.role === "alum" ? "alum" : d.role}${d.grad_year ? ` ’${String(d.grad_year).slice(-2)}` : ""}`;
+export function cardLabel(d: Pick<DirRow, "node_id" | "role" | "grad_year" | "public_title" | "public_company"> & { branch_code?: string | null }): string {
+  // a professional is described by the field they work in; a college person by college, role and year
+  const who =
+    d.role === "professional"
+      ? `${DOMAIN_LABEL[d.branch_code ?? ""] ?? "Professional"} professional`
+      : `${d.node_id.toUpperCase()} ${d.role === "alum" ? "alum" : d.role}${d.grad_year ? ` ’${String(d.grad_year).slice(-2)}` : ""}`;
   const what = [d.public_title, d.public_company].filter(Boolean).join(", ");
   return what ? `${who} · ${what}` : who;
 }

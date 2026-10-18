@@ -18,7 +18,7 @@ type Match = {
   label: string;
 };
 type Step = { sem_or_year: number; label: string; cgpa_band: string | null; internship: boolean; decision: string | null; org: string | null };
-type MirrorResponse = { matches: Match[]; sem: number; nodes: { id: string; ok: boolean }[]; skippedOffline: string[] };
+type MirrorResponse = { matches: Match[]; sem: number; nodes: { id: string; ok: boolean }[]; skippedOffline: string[]; notStudent?: boolean };
 
 function Timeline({ pid }: { pid: string }) {
   const [steps, setSteps] = useState<Step[] | null>(null);
@@ -75,6 +75,17 @@ function MirrorBody() {
 
   if (error) return <p role="alert" className="rounded-xl bg-[var(--surface)] p-5 text-[var(--red)]">{error}</p>;
   if (!data) return <div className="h-72 animate-pulse rounded-[22px] bg-[var(--surface)]" role="status" aria-label="Finding people like you" />;
+  if (data.notStudent) {
+    return (
+      <div className="rounded-[22px] bg-[var(--surface)] p-8 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
+        <h1 className="text-4xl font-black uppercase leading-tight">Mirror is for students.</h1>
+        <p className="mt-3 max-w-2xl text-xl text-[var(--muted)]">It shows seniors who were where you are now. You are already past that stage, so use Find: say who you need, in any profession, and Setu shows the warmest way in.</p>
+        <Link href="/live/find" className="mt-6 inline-block rounded-full bg-[var(--ink)] px-8 py-3 text-xl font-bold text-white">
+          Find someone
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

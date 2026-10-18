@@ -8,6 +8,7 @@ import { COLLEGE_COLOUR, useNodeHealth, useSession } from "@/lib/fed/client";
 const NAV = [
   { href: "/live", label: "Home" },
   { href: "/live/mirror", label: "Mirror" },
+  { href: "/live/find", label: "Find" },
   { href: "/live/bridge", label: "Bridge" },
   { href: "/live/leaderboard", label: "Leaderboard" },
   { href: "/live/ask", label: "Ask Setu" },
@@ -21,7 +22,7 @@ export function NodePill({ id, status, label }: { id: string; status: string; la
   return (
     <span className="inline-flex items-center gap-2 rounded-full border border-[var(--ink)]/15 bg-[var(--surface)] px-3 py-1 text-sm font-bold">
       <span className="size-2.5 rounded-full" style={{ background: STATUS_COLOUR[status] ?? STATUS_COLOUR.unknown }} />
-      <span style={{ color: COLLEGE_COLOUR[id] }}>{label ?? id.toUpperCase()}</span>
+      <span style={{ color: COLLEGE_COLOUR[id] }}>{label ?? (id === "pro" ? "PROS" : id.toUpperCase())}</span>
     </span>
   );
 }
@@ -41,7 +42,7 @@ export function LiveHeader() {
           <span className="text-sm font-semibold normal-case text-[var(--muted)]">Live Network</span>
         </Link>
         <div className="flex flex-wrap items-center gap-2" aria-label="Server status">
-          {(nodes.length ? nodes : [{ id: "ngit", status: "unknown" }, { id: "rce", status: "unknown" }]).map((n) => (
+          {(nodes.length ? nodes : [{ id: "ngit", status: "unknown" }, { id: "rce", status: "unknown" }, { id: "pro", status: "unknown" }]).map((n) => (
             <NodePill key={n.id} id={n.id} status={n.status} />
           ))}
           <NodePill id="hub" status={hub} label="HUB" />

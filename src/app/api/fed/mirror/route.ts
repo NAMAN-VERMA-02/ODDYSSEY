@@ -25,7 +25,12 @@ export async function GET() {
   if (!session) return fail("Pick a persona or join first.", 401);
 
   const own = await nodeCall<Vector>(session.node as (typeof NODE_IDS)[number], "POST", "/vector", { pid: session.pid });
-  if (!own.ok) return fail(own.error === "revoked" ? "Your college has disconnected from Setu." : "Your college server is not reachable right now.", 503);
+  // Mirror compares a student with seniors at the same semester. Alumni and professionals have no current semester:
+  // they use Find instead.
+  if (!own.ok && own.error === "bad_response" && own.status === 404) {
+    return ok({ matches: [], sem: 0, nodes: [], skippedOffline: [], notStudent: true });
+  }
+  if (!own.ok) return fail(own.error === "revoked" ? "Your college has disconnected from Setu." : "Your server is not reachable right now.", 503);
 
   const offline = await offlineNodeIds();
   const targets = NODE_IDS.filter((id) => !offline.has(id) || id === session.node);

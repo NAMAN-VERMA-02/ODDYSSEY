@@ -8,7 +8,7 @@ type Dir = { pid: string; node_id: string; role: string; branch_code: string | n
 type Hop = { idx: number; from_pid: string; to_pid: string; status: string };
 type Audit = { id: number; node_id: string | null; call: string; identifying_fields: number; ms: number | null };
 
-const NODE_URL: Record<string, string | undefined> = { ngit: process.env.NEXT_PUBLIC_NODE_NGIT_URL, rce: process.env.NEXT_PUBLIC_NODE_RCE_URL };
+const NODE_URL: Record<string, string | undefined> = { ngit: process.env.NEXT_PUBLIC_NODE_NGIT_URL, rce: process.env.NEXT_PUBLIC_NODE_RCE_URL, pro: process.env.NEXT_PUBLIC_NODE_PRO_URL };
 
 /** Proof on screen: the hub's own raw rows next to the college's own console. */
 export function PrivacyView() {
@@ -16,17 +16,18 @@ export function PrivacyView() {
   const [hops, setHops] = useState<Hop[]>([]);
   const [audit, setAudit] = useState<Audit[]>([]);
   const [totals, setTotals] = useState({ identifying: 0, calls: 0, released: 0 });
-  const [open, setOpen] = useState<"ngit" | "rce">("ngit");
+  const [open, setOpen] = useState<"ngit" | "rce" | "pro">("ngit");
 
   const load = useCallback(async () => {
     const db = createClient();
-    const [d, h, a, all, ngit, rce] = await Promise.all([
+    const [d, h, a, all, ngit, rce, pro] = await Promise.all([
       db.from("fed_directory").select("pid, node_id, role, branch_code, grad_year, public_title, public_company").order("created_at", { ascending: false }).limit(6),
       db.from("fed_hops").select("idx, from_pid, to_pid, status").order("sent_at", { ascending: false, nullsFirst: false }).limit(5),
       db.from("fed_audit").select("id, node_id, call, identifying_fields, ms").order("id", { ascending: false }).limit(6),
       db.from("fed_audit").select("identifying_fields").limit(20000),
       api<{ residency?: { namesReleased: number | null } }>("/api/fed/college/ngit"),
       api<{ residency?: { namesReleased: number | null } }>("/api/fed/college/rce"),
+      api<{ residency?: { namesReleased: number | null } }>("/api/fed/college/pro"),
     ]);
     setDir((d.data ?? []) as Dir[]);
     setHops((h.data ?? []) as Hop[]);
@@ -35,7 +36,7 @@ export function PrivacyView() {
     setTotals({
       identifying: rows.reduce((s, r) => s + r.identifying_fields, 0),
       calls: rows.length,
-      released: (ngit.data.residency?.namesReleased ?? 0) + (rce.data.residency?.namesReleased ?? 0),
+      released: (ngit.data.residency?.namesReleased ?? 0) + (rce.data.residency?.namesReleased ?? 0) + (pro.data.residency?.namesReleased ?? 0),
     });
   }, []);
   useEffect(() => {
@@ -103,7 +104,7 @@ export function PrivacyView() {
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-2xl font-black">The college’s own console</h2>
             <div className="flex gap-2">
-              {(["ngit", "rce"] as const).map((n) => (
+              {(["ngit", "rce", "pro"] as const).map((n) => (
                 <button key={n} type="button" onClick={() => setOpen(n)} aria-pressed={open === n} className={`rounded-full px-4 py-1.5 text-base font-bold ${open === n ? "bg-[var(--ink)] text-white" : "border border-[var(--ink)]/30"}`}>
                   {n.toUpperCase()}
                 </button>
