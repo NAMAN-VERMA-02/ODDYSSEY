@@ -50,6 +50,7 @@ SKILL_TO_DOMAIN = {"python": "software", "ml": "ai-ml", "web": "software", "dsa"
                    "design": "design"}
 TITLE_TO_DOMAIN = [
     ("machine learning", "ai-ml"), ("ml ", "ai-ml"), ("data scientist", "ai-ml"), (" ai ", "ai-ml"),
+    ("ml engineer", "software"), ("ai engineer", "software"),  # they also write software
     ("data ", "data"), ("analyst", "data"), ("analytics", "data"),
     # "engineer" alone says nothing: a mechanical engineer is not a software engineer
     ("software", "software"), ("developer", "software"), ("backend", "software"), ("frontend", "software"),

@@ -86,13 +86,15 @@ def offers_of(person: dict, profile: dict | None) -> list[str]:
         if profile.get("domain") and profile["domain"] not in offers:
             offers.insert(0, profile["domain"])
         return offers
+    # What the job title says wins: a mechanical engineer who once learned Python does not offer software.
+    # College skills are only used when the title tells us nothing.
+    from_title = _title_domains(person.get("title"))
+    if from_title:
+        return from_title
     out: list[str] = []
     for s in person.get("skills") or []:
         d = taxonomy.SKILL_TO_DOMAIN.get(s)
         if d and d not in out:
-            out.append(d)
-    for d in _title_domains(person.get("title")):
-        if d not in out:
             out.append(d)
     return out
 

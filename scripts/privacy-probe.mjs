@@ -90,7 +90,7 @@ for (const [id, base] of Object.entries(NODE)) {
   });
   await check(`${id}: a forged viewer token (wrong secret) is treated as anonymous`, async () => {
     const dir = await call(`${base}/directory`, { headers: { authorization: `Bearer ${hub}` } });
-    const target = dir.json.find((p) => p.role === "alum");
+    const target = dir.json.find((p) => p.role === "alum" || p.role === "professional");
     const r = await call(`${base}/public/card/${target.pid}`, { headers: { "x-setu-viewer": forgedViewer(target.pid) } });
     expect(r.status === 403 && !r.json?.name, `forged self-token gave ${r.status} ${JSON.stringify(r.json)}`);
     const cards = await jsonPost(`${base}/public/cards`, { pids: [target.pid] }, { "x-setu-viewer": forgedViewer(target.pid) });
