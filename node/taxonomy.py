@@ -49,8 +49,14 @@ NEED_MARKERS = ["need", "needs", "looking", "want", "wants", "find", "hire", "se
 SKILL_TO_DOMAIN = {"python": "software", "ml": "ai-ml", "web": "software", "dsa": "software", "cloud": "software",
                    "design": "design"}
 TITLE_TO_DOMAIN = [
-    ("machine learning", "ai-ml"), ("ml ", "ai-ml"), ("data scientist", "ai-ml"), ("data ", "data"), ("analyst", "data"),
-    ("engineer", "software"), ("developer", "software"), ("software", "software"), ("devops", "software"),
+    ("machine learning", "ai-ml"), ("ml ", "ai-ml"), ("data scientist", "ai-ml"), (" ai ", "ai-ml"),
+    ("data ", "data"), ("analyst", "data"), ("analytics", "data"),
+    # "engineer" alone says nothing: a mechanical engineer is not a software engineer
+    ("software", "software"), ("developer", "software"), ("backend", "software"), ("frontend", "software"),
+    ("full-stack", "software"), ("devops", "software"), ("cloud", "software"), ("mobile", "software"),
+    ("platform", "software"), ("systems engineer", "software"), ("site reliability", "software"),
     ("product manager", "operations"), ("design", "design"), ("founder", "entrepreneurship"),
-    ("professor", "education"), ("research", "research"), ("embedded", "hardware"), ("hardware", "hardware"),
+    ("professor", "education"), ("research", "research"),
+    ("mechanical", "hardware"), ("embedded", "hardware"), ("hardware", "hardware"), ("electronics", "hardware"),
+    ("robotics", "hardware"),
 ]
