@@ -45,3 +45,8 @@
 - **Render does not redeploy when you push.** After changing anything in `node/`, press **Manual Deploy** on each of the three services (or use the API), then wait for `/match` to answer (`POST /match` with the hub token returns 200). Vercel does redeploy on push.
 - Bulk-pasting a `.env` file into Vercel's form can silently drop lines. After pasting, confirm every name is in the list, or set variables through the API with a short-lived token and revoke it afterwards.
 - Warm-up now covers three servers: **Warm up** on `/stage` pings all of them.
+
+## Screens that blink or never finish loading
+
+Cause seen once (2026-10-18): the hub wrote a server's state to `fed_nodes` on every call, every open screen listens to that table over Realtime, so each search refreshed the screen, which searched again. Fixed: state is written only when it changes. Check any time with `node scripts/realtime-storm-check.mjs https://oddyssey-nu.vercel.app .env.vercel.production` (run it a few seconds after a reset): it must print `PASS: no refresh storm` (0 events for a burst of searches; a few events right after a reset are normal).
+If a tab still blinks after a deploy, hard-refresh it (Ctrl+Shift+R): an old tab keeps running the old code.
