@@ -38,3 +38,10 @@
 | Gemini slow or down | Ask Setu falls back to offline mode after 10 s. The draft button falls back to a template. |
 | A judge cannot scan | Stage → "Play Priya on this device". |
 | Intro stuck | Stage shows each hop's link; open the pending one directly. |
+
+## Three servers and deploys (added with the professional network)
+
+- The hub needs 17 server variables for three servers: `NODE_{NGIT,RCE,PRO}_URL`, `_HUB_TOKEN`, `_VIEWER_SECRET`, `_MCP_TOKEN`, plus `NEXT_PUBLIC_NODE_{NGIT,RCE,PRO}_URL`. `node scripts/gen-env-pro.mjs` adds the professional ones without touching existing secrets; its output file is `.env.vercel.pro-only`. Check them with `GET /api/fed/health`: all three servers must show `online`.
+- **Render does not redeploy when you push.** After changing anything in `node/`, press **Manual Deploy** on each of the three services (or use the API), then wait for `/match` to answer (`POST /match` with the hub token returns 200). Vercel does redeploy on push.
+- Bulk-pasting a `.env` file into Vercel's form can silently drop lines. After pasting, confirm every name is in the list, or set variables through the API with a short-lived token and revoke it afterwards.
+- Warm-up now covers three servers: **Warm up** on `/stage` pings all of them.

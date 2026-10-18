@@ -38,3 +38,15 @@ Run twice in a row and record timings here.
 | 3 (live, AI key set) | 2026-10-18 | 15/15 in 23 s | Reset 2.3 s, kill switch back in 0.8 s, Ask Setu in AI mode (2 MCP calls, 7 cards). Second clean run in a row. |
 
 Two things found only by running live: the Vercel region (fixed) and a stale `SUPABASE_SERVICE_ROLE_KEY` on Vercel that made every hub write fail with "Invalid API key" (fixed by pasting the right value). The reset now reads from the colleges before it clears the hub and reports its failure reason.
+
+## Professional network, live (2026-10-18)
+
+| Run | Result | Notes |
+|---|---|---|
+| 4 (live, three servers, first deploy of the professional network) | 18/24 | The college story and the professional join passed. Find, Bridge and the doctor's intro failed because the NGIT and RCE servers were still on the first build: Render does not redeploy on push for services created from a public repo URL. Fixed by triggering manual deploys. |
+| 5 (live, all three servers on the latest code) | 24/24 in 34 s | Doctor story included: Find (91%, route 59.5%), hand-off to Bridge, AI draft written as a professional, CTO and developer both say yes, names and note read straight from the professional server. |
+| 6 (live, after title-first matching fix) | 24/24 in 32 s | Second clean run in a row. |
+
+- **Privacy probe** (`scripts/privacy-probe.mjs`): all checks pass on production, now including the professional server (1,562 hub rows contain no name, email or phone).
+- **MCP demo** (`scripts/mcp-demo.mjs`): three servers answer 401 without a key and a plain-words need in about 120 ms with `identifying_fields = 0`; 0 names in every response.
+- **Found only by running live:** the Vercel variables for the third server had not saved (the bulk paste silently drops lines; set through the API instead), and Render needs a manual deploy after each push (`trigger_deploy`, or the dashboard's Manual Deploy).
