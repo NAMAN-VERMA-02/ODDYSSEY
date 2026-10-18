@@ -39,16 +39,16 @@ function Composer({ session, viewer, target, route }: { session: SessionInfo; vi
       setError(r.data.error ?? "We could not send that.");
       return;
     }
-    // the ask text goes straight to your own college's server, never through the hub
+    // the ask text goes straight to your own server, never through the hub
     const own = viewer[session.node];
     if (own && text.trim()) {
-      // {myName} is filled in here, on your device, from your own college's server
+      // {myName} is filled in here, on your device, from your own server
       let message = text.trim();
       if (message.includes("{myName}")) {
         const card = await fetch(`${own.url}/public/card/${session.pid}`, { headers: { "x-setu-viewer": own.token } })
           .then((res) => (res.ok ? (res.json() as Promise<{ name?: string }>) : null))
           .catch(() => null);
-        message = message.replaceAll("{myName}", card?.name ?? "A student");
+        message = message.replaceAll("{myName}", card?.name ?? "Someone on Setu");
       }
       await fetch(`${own.url}/public/asks`, {
         method: "POST",
@@ -63,7 +63,7 @@ function Composer({ session, viewer, target, route }: { session: SessionInfo; vi
   return (
     <div className="rounded-[22px] bg-[var(--surface)] p-6 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
       <h2 className="text-2xl font-black">Your message</h2>
-      <p className="text-base text-[var(--muted)]">It is stored on {session.node.toUpperCase()}’s server. The hub never sees the words.</p>
+      <p className="text-base text-[var(--muted)]">It is stored on {session.node === "pro" ? "the professional network’s" : `${session.node.toUpperCase()}’s`} server. The hub never sees the words.</p>
       <label className="sr-only" htmlFor="ask">
         Message
       </label>
@@ -73,7 +73,7 @@ function Composer({ session, viewer, target, route }: { session: SessionInfo; vi
         onChange={(e) => setText(e.target.value)}
         rows={5}
         maxLength={900}
-        placeholder="Hi, I’m a 3rd-year ECE student building ML projects. Could you spare 15 minutes to tell me how you got your first ML role?"
+        placeholder={session.role === "professional" ? "Hi, I run a clinic and need a patient follow-up app. Could we talk for 15 minutes about how you would build it?" : "Hi, I’m a 3rd-year ECE student building ML projects. Could you spare 15 minutes to tell me how you got your first ML role?"}
         className="mt-3 w-full rounded-xl border border-[var(--ink)]/20 bg-[var(--paper)] p-4 text-lg"
       />
       <fieldset className="mt-4">
@@ -125,18 +125,20 @@ function Composer({ session, viewer, target, route }: { session: SessionInfo; vi
 
 function BridgeBody({ session, viewer }: { session: SessionInfo; viewer: ViewerTokens }) {
   const params = useSearchParams();
-  const [q, setQ] = useState("FinStack");
+  const preset = params.get("target");
+  // arriving with a chosen person (from Find, Mirror or Ask) means no default search list
+  const [q, setQ] = useState(preset ? "" : "FinStack");
   const [targets, setTargets] = useState<Target[]>([]);
   const [chosen, setChosen] = useState<Target | null>(null);
   const [route, setRoute] = useState<RouteResponse | null>(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
-  const preset = params.get("target");
 
   const search = useCallback(async (term: string) => {
     const r = await api<{ targets: Target[] }>(`/api/fed/targets?q=${encodeURIComponent(term)}`);
     if (r.ok) setTargets(r.data.targets);
   }, []);
   useEffect(() => {
+    if (preset) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void search(q);
     // run once for the starting search text
@@ -159,9 +161,13 @@ function BridgeBody({ session, viewer }: { session: SessionInfo; viewer: ViewerT
   useEffect(() => {
     if (!preset) return;
     let alive = true;
-    api<{ targets: Target[] }>(`/api/fed/targets?q=`).then((r) => {
+    // look the person up by id: a search would only return the first few dozen people in the network
+    api<{ targets: Target[] }>(`/api/fed/targets?pid=${encodeURIComponent(preset)}`).then((r) => {
       const t = r.data.targets?.find((x) => x.pid === preset);
-      if (alive && t) void choose(t);
+      if (alive && t) {
+        setTargets([t]); // show who was chosen
+        void choose(t);
+      }
     });
     return () => {
       alive = false;
@@ -228,7 +234,7 @@ function BridgeBody({ session, viewer }: { session: SessionInfo; viewer: ViewerT
                 <p className="mt-1 font-mono text-xl font-bold">
                   {math(route.best)} = <span className="text-3xl">{pct(route.best.prob)}</span>
                 </p>
-                <p className="text-base">{route.best.path.length - 2} people in between</p>
+                <p className="text-base">{route.best.path.length - 2} {route.best.path.length - 2 === 1 ? "person" : "people"} in between</p>
               </div>
               {route.shortest && route.shortest.path.join() !== route.best.path.join() && (
                 <div className="rounded-2xl bg-[var(--stone)] p-5">

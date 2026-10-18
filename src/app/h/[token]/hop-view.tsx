@@ -2,8 +2,9 @@
 
 import { use, useCallback, useEffect, useRef, useState } from "react";
 import { api, useFedLive, type ViewerTokens } from "@/lib/fed/client";
+import { DOMAIN_LABEL } from "@/lib/fed/taxonomy";
 
-type Card = { pid: string; node: string; role: string; label: string; title: string | null; company: string | null; gradYear: number | null };
+type Card = { pid: string; node: string; role: string; branch?: string | null; label: string; title: string | null; company: string | null; gradYear: number | null };
 type HopContext = {
   hop: { id: string; status: "waiting" | "sent" | "accepted" | "declined" | "cancelled"; isTarget: boolean; position: number; total: number };
   intro: { id: string; status: string; trustStep: string; workSeen: boolean; response: string | null };
@@ -21,6 +22,12 @@ const CHOICES = [
   { v: "call", label: "A 15-minute call", points: 25 },
   { v: "referral", label: "Give a referral", points: 50 },
 ] as const;
+
+/** Who is asking, in role words only: "a Healthcare professional" or "an NGIT student". */
+function asker(r: { node: string; role: string; branch?: string | null }): string {
+  if (r.role === "professional") return `${DOMAIN_LABEL[r.branch ?? ""] ?? "Setu"} professional`;
+  return `${r.node.toUpperCase()} ${r.role === "alum" ? "alum" : "student"}`;
+}
 
 function buzz() {
   try {
@@ -115,12 +122,12 @@ export function HopView({ paramsPromise }: { paramsPromise: Promise<{ token: str
         Hop {hop.position} of {hop.total}
       </p>
       <h1 className="mt-1 text-4xl font-black leading-[1.05] tracking-tight">
-        A {ctx.requester.node.toUpperCase()} student wants to reach a {ctx.target.title ?? "professional"} at {ctx.target.company ?? "a company"}.
+        A {asker(ctx.requester)} wants to reach a {ctx.target.title ?? "professional"} at {ctx.target.company ?? "a company"}.
       </h1>
       <p className="mt-3 text-xl text-[var(--muted)]">{hop.isTarget ? "You’re the person they want to reach." : `You’re hop ${hop.position} of ${hop.total}: pass it on if you can.`}</p>
 
       <section className="mt-5 rounded-2xl bg-[var(--surface)] p-5 shadow-[0_0_0_1px_rgba(15,15,14,.08)]">
-        <p className="text-lg font-bold">{requesterName ?? "A student"}</p>
+        <p className="text-lg font-bold">{requesterName ?? "Someone on Setu"}</p>
         {ask ? (
           <>
             <p className="mt-2 whitespace-pre-line text-xl">{ask.text}</p>

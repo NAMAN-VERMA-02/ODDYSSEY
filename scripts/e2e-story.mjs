@@ -246,6 +246,17 @@ await step("Bridge for the doctor: through a trusted CTO 59.5% vs a cold message
   assert(r.data.shortest.path.length === 2 && Math.abs(r.data.shortest.prob - 0.2) < 0.002, `shortest ${JSON.stringify(r.data.shortest)}`);
 });
 
+await step("Bridge hand-off from Find finds the exact person, and the AI draft speaks as a professional", async () => {
+  const one = await doctor.req(`/api/fed/targets?pid=${ishaan}`);
+  assert(one.data.targets?.length === 1 && one.data.targets[0].pid === ishaan, "Bridge could not look the person up by id");
+  const d = await doctor.req("/api/fed/draft", { method: "POST", json: { target: ishaan } });
+  assert(d.ok && typeof d.data.draft === "string", JSON.stringify(d.data));
+  assert(d.data.draft.includes("{myName}"), "the draft has no name placeholder");
+  assert(!/student|college|semester/i.test(d.data.draft), `the draft talks like a student: ${d.data.draft.slice(0, 120)}`);
+  assert(!/Ananya|Rao|Ishaan|Kapoor/.test(d.data.draft), "the draft contains a real name");
+  return d.data.fallback ? "template" : "AI";
+});
+
 await step("Doctor sends the intro; the CTO and the developer both say yes", async () => {
   const sent = await doctor.req("/api/fed/intro", { method: "POST", json: { target: ishaan, trust_step: "call" } });
   assert(sent.ok && sent.data.intro_id, JSON.stringify(sent.data));

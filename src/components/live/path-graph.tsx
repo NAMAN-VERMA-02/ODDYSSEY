@@ -29,7 +29,15 @@ const key = (a: string, b: string) => `${a}|${b}`;
 function shortLabel(p: GraphPerson, name?: string): string {
   if (name) return name.split(" ")[0];
   // a professional has no graduation year: show their role instead ("Cardiologist", "CTO")
-  if (p.role === "professional") return (p.title ?? "Professional").split(/[\s&]/)[0];
+  if (p.role === "professional") {
+    const words = (p.title ?? "Professional").split(" ");
+    let out = words[0];
+    for (const w of words.slice(1)) {
+      if ((out + " " + w).length > 16) break;
+      out += ` ${w}`;
+    }
+    return out; // "Product Designer", "Full-stack & ML", "Cardiologist"
+  }
   const yr = p.gradYear ? ` ’${String(p.gradYear).slice(-2)}` : "";
   return `${p.node.toUpperCase()}${yr}`;
 }
