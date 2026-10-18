@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   return ok({
     siteUrl: site,
     joinQr: latest("qr_join"),
-    priyaQr: latest("qr_priya"),
+    hopQr: latest("qr_hop") || latest("qr_priya"),
     intros: (intros ?? []).map((i) => ({
       ...i,
       requester: dir.get(i.requester) ? cardLabel(dir.get(i.requester)!) : i.requester,
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
   });
 }
 
-const body = z.object({ action: z.enum(["qr_join:on", "qr_join:off", "qr_priya:on", "qr_priya:off"]) });
+const body = z.object({ action: z.enum(["qr_join:on", "qr_join:off", "qr_hop:on", "qr_hop:off", "qr_priya:on", "qr_priya:off"]) });
 
 /** Shows or hides a full-screen QR on the projector. */
 export async function POST(req: Request) {

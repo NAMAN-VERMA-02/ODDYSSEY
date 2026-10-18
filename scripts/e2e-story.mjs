@@ -252,6 +252,14 @@ await step("Doctor sends the intro; the CTO and the developer both say yes", asy
   docIntro = sent.data.intro_id;
   const ask = await fetch(`${docViewer.pro.url}/public/asks`, { method: "POST", headers: { "content-type": "application/json", "x-setu-viewer": docViewer.pro.token }, body: JSON.stringify({ intro_id: docIntro, text: "I run a cardiac clinic and need a patient follow-up app. Could we talk for 15 minutes?", work_url: null }) });
   assert(ask.ok, `professional server refused the ask: ${ask.status}`);
+  // a guest can scan a QR for whoever is being asked right now and play them
+  await new Jar().req("/api/fed/stage", { method: "POST", headers: stageHeaders, json: { action: "qr_hop:on" } });
+  const overlay = await new Jar().req("/api/fed/overlay");
+  await new Jar().req("/api/fed/stage", { method: "POST", headers: stageHeaders, json: { action: "qr_hop:off" } });
+  assert(overlay.data.hop?.link?.includes("/h/") && /CTO/.test(overlay.data.hop.label), `overlay: ${JSON.stringify(overlay.data)}`);
+  assert(!/Rahul|Desai/.test(JSON.stringify(overlay.data.hop.label)), "the QR label names the person");
+  const off = await new Jar().req("/api/fed/overlay");
+  assert(off.data.hop === null, "the QR stayed on after it was switched off");
   await act("rahul", true, undefined, "Ananya is a great doctor. Ishaan, worth a call.");
   const mid = await doctor.req(`/api/fed/intro/${docIntro}`);
   assert(mid.data.hops.find((h) => h.status === "sent")?.is_target, "the developer was not asked after the CTO said yes");

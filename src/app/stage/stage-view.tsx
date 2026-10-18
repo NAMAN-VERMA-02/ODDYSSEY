@@ -7,7 +7,7 @@ import { api, useFedLive, useNodeHealth } from "@/lib/fed/client";
 
 type Hop = { id: string; idx: number; status: string; isTarget: boolean; storyKey: string | null; label: string; link: string | null };
 type Intro = { id: string; requester: string; target: string; status: string; success_prob: number | null; hops: Hop[] };
-type State = { siteUrl: string; joinQr: boolean; priyaQr: boolean; intros: Intro[] };
+type State = { siteUrl: string; joinQr: boolean; hopQr: boolean; intros: Intro[] };
 
 const NODE_URL: Record<string, string | undefined> = { ngit: process.env.NEXT_PUBLIC_NODE_NGIT_URL, rce: process.env.NEXT_PUBLIC_NODE_RCE_URL, pro: process.env.NEXT_PUBLIC_NODE_PRO_URL };
 const PERSONAS = ["aman", "rohan", "vikram", "priya", "meera", "ananya", "rahul", "ishaan"];
@@ -78,7 +78,8 @@ export function StageView() {
 
   const origin = state?.siteUrl ?? "";
   const allGreen = nodes.length === 2 && nodes.every((n) => n.status === "online");
-  const priyaHop = state?.intros.flatMap((i) => i.hops).find((h) => h.storyKey === "priya" && h.link);
+  // the demo person being asked right now (a guest can play them from a QR, or you can on this device)
+  const askedNow = state?.intros.flatMap((i) => i.hops).find((h) => h.storyKey && h.link);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-5 text-lg">
@@ -101,7 +102,7 @@ export function StageView() {
         <button className={btn} disabled={!!busy} onClick={warm}>{busy === "warm" ? "Warming…" : "Warm up"}</button>
         <button className={btn} disabled={!!busy} onClick={reset}>{busy === "reset" ? "Resetting…" : "Reset demo"}</button>
         <button className={ghost} onClick={() => stage(state?.joinQr ? "qr_join:off" : "qr_join:on")}>{state?.joinQr ? "Hide join QR" : "Show join QR"}</button>
-        <button className={ghost} onClick={() => stage(state?.priyaQr ? "qr_priya:off" : "qr_priya:on")}>{state?.priyaQr ? "Hide Priya QR" : "Show Priya QR"}</button>
+        <button className={ghost} onClick={() => stage(state?.hopQr ? "qr_hop:off" : "qr_hop:on")}>{state?.hopQr ? "Hide the QR of who is asked" : "Show QR: guest plays who is asked"}</button>
       </section>
 
       <section className="rounded-2xl bg-[var(--surface)] p-5">
@@ -130,9 +131,9 @@ export function StageView() {
             </div>
           </div>
         ))}
-        {priyaHop?.link && (
+        {askedNow?.link && (
           <p className="mt-4 text-base">
-            No judge scans? <a className="font-bold underline" href={priyaHop.link} target="_blank" rel="noopener noreferrer">Play Priya on this device</a>
+            No one scans? <a className="font-bold underline" href={askedNow.link} target="_blank" rel="noopener noreferrer">Play {askedNow.label} on this device</a>
           </p>
         )}
       </section>

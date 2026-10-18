@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# private MCP connection commands (contain access tokens)
+.mcp-connect.txt
