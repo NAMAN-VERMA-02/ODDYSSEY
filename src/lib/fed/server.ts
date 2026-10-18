@@ -55,7 +55,11 @@ export function isStage(req: Request): boolean {
 }
 
 /** Makes sure both college rows exist (name, city, urls) so status updates have something to update. */
+let nodesEnsured = false;
 export async function ensureNodes() {
+  // once per server instance: an upsert is a write, and every write is broadcast to every open screen
+  if (nodesEnsured) return;
+  nodesEnsured = true;
   const rows = configuredNodes().map((n) => ({
     id: n.id,
     name: NODE_META[n.id].name,

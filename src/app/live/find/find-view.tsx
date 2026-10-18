@@ -60,9 +60,10 @@ function FindBody({ session, viewer }: { session: SessionInfo; viewer: ViewerTok
     };
   }, [session.role, own]);
 
-  // a college going offline or coming back changes who can answer
+  // a server going offline or coming back changes who can answer. The hub now writes a server's state only when it
+  // changes, so this fires on a real change (a kill switch), not on every search.
   useFedLive(["fed_nodes"], () => {
-    if (ans) void run(ans.query);
+    if (ans && !busy) void run(ans.query);
   });
 
   return (
@@ -102,10 +103,11 @@ function FindBody({ session, viewer }: { session: SessionInfo; viewer: ViewerTok
       </form>
 
       {error && <p role="alert" className="rounded-xl bg-[var(--surface)] p-4 text-[var(--red)]">{error}</p>}
-      {busy && <div className="h-48 animate-pulse rounded-[22px] bg-[var(--surface)]" role="status" aria-label="Searching" />}
+      {busy && !ans && <div className="h-48 animate-pulse rounded-[22px] bg-[var(--surface)]" role="status" aria-label="Searching" />}
 
-      {ans && !busy && (
-        <section aria-live="polite" className="space-y-4">
+      {/* previous results stay on screen (dimmed) while a refresh runs, so the page never blinks empty */}
+      {ans && (
+        <section aria-live="polite" aria-busy={busy} className={`space-y-4 transition-opacity ${busy ? "opacity-60" : ""}`}>
           <div className="flex flex-wrap items-center gap-2 text-base">
             <span className="font-bold">Asked:</span>
             {ans.searched.map((s) => (

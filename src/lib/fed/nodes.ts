@@ -16,11 +16,28 @@ async function audit(node: NodeId, call: string, ms: number, identifyingFields: 
   }
 }
 
-async function setStatus(node: NodeId, status: "online" | "offline" | "revoked", ms: number | null) {
+/**
+ * Records a server's state, but only when it CHANGED (or once a minute). Every write to fed_nodes is broadcast to all
+ * open screens over Realtime; writing on every call made the Find and Mirror screens refresh themselves in a loop.
+ */
+const lastWritten = new Map<string, { status: string; people: number | undefined; at: number }>();
+const KEEP_FRESH_MS = 60_000;
+
+export async function setStatus(node: NodeId, status: "online" | "offline" | "revoked", ms: number | null, people?: number) {
+  const last = lastWritten.get(node);
+  const now = Date.now();
+  const same = last && last.status === status && (people === undefined || last.people === people);
+  if (same && now - last.at < KEEP_FRESH_MS) return;
+  lastWritten.set(node, { status, people: people ?? last?.people, at: now });
   try {
     await fedDb()
       .from("fed_nodes")
-      .update({ status, latency_ms: ms, ...(status === "online" ? { last_seen: new Date().toISOString() } : {}) })
+      .update({
+        status,
+        latency_ms: ms,
+        ...(people !== undefined ? { people_count: people } : {}),
+        ...(status === "online" ? { last_seen: new Date(now).toISOString() } : {}),
+      })
       .eq("id", node);
   } catch {
     // status is advisory
