@@ -26,3 +26,14 @@
 13. **How does it scale?** The Mirror is plain cosine similarity on a 15-number vector; pgvector when a node holds 100k+ profiles. Nodes scale independently.
 14. **What if the AI is down?** Drafts fall back to a template and Ask Setu to keyword routing over the same tools; search never needs a key.
 15. **Business model?** Free for students. Colleges pay for outcomes data, professionals pay for Setu Pro, companies pay a fee per warm hire.
+
+## Questions about professionals (not only alumni)
+
+16. **Is this only an alumni network?** No. There are three servers: two colleges and a professional network. A doctor, a lawyer and a developer can join the professional server directly, with no college. Alumni and professionals sit in one graph, so a college alum can be the trusted link between a doctor and a developer.
+17. **How does a doctor find a coder?** She says what she needs in plain words (English or Hinglish). Each server parses it into what is asked for versus context, matches it against what its people *offer*, and returns job cards with reasons. Setu merges them and shows the warmest route.
+18. **What stops it returning other doctors for "I need a developer"?** The matcher separates what you are asking for from what you are. The tag after "need" is primary and must be offered by the person; the rest only ranks. There is a test for exactly this sentence.
+19. **What do you ask a professional?** Field, role, organisation, years, what they can help with, what they need, and what they are open to. Those are the public job card. Name, contact and their own words stay on their server and are shown only after someone says yes. See the table in `DEMO_SCRIPT.md`.
+20. **How do you know a doctor is really a doctor?** Today a professional joins with a self-declared role, labelled as such. The next step is verification on their own server (a registration number checked there, only a "verified" badge published), so the hub still never holds the number. We do not claim verification we do not do.
+21. **Why would a professional help a stranger?** The same reasons as a senior: Points for every yes, +100 for the chain when it ends well, and a leaderboard that cannot be bought. Professionals also choose what they are open to (a 15-minute call, advice, collaboration, hiring), and can be open to none.
+22. **Could a competitor scrape the professional network through MCP?** Each server needs its own key, returns at most a few ranked job cards per call, never a name or contact, and logs every call. A server can revoke access in one click. Rate limits per key are the next step.
+23. **Is "match_need" an AI?** The matching is plain code on each server (tags and keywords), so it is fast, explainable and works offline. The AI is optional: it drafts the message and can drive the same tools from a chat.

@@ -31,3 +31,15 @@ node scripts/mcp-smoke.mjs                                                      
 - The free Render nodes sleep after 15 idle minutes (cold start about a minute); Warm up first.
 - Pseudonymous IDs can still be personal data under DPDP, which is why the UI says "identifying fields", not "personal fields".
 - Supabase's advisor lists warnings on the campus app (not on the `fed_*` tables): a security-definer view, definer functions, and leaked-password protection turned off.
+
+## Professionals and cross-profession matching
+
+| Claim | Show it | Backed by |
+|---|---|---|
+| "A doctor can find a developer." | `/live/find` as Dr. Ananya: her need is prefilled from her own server; the health-app developer ranks first. | `node/tests/test_pro.py` (the exact sentence returns that developer first and no other doctors), `scripts/e2e-story.mjs` steps "Find" and "Bridge for the doctor". |
+| "The search asks every server, not a database." | The "Asked: NGIT ? RCE ? Professionals ?" line on the results. | e2e asserts all three servers answered; each server logs the call in its own audit trail. |
+| "Her own words never reach Setu." | The grey line "Setu never saw these words." | e2e reads her saved note from her server and asserts it is absent from every hub response. |
+| "Professionals and alumni are one network." | The route for the doctor can pass through a college alum; Find also returns alumni. | Cross-network edges in `src/lib/fed/seed/cross-edges.ts`; the hub's route search treats every server's people alike. |
+| "A guest joins as a professional and is findable at once." | Show join QR ? `/join` ? Professional ? then `/live/find`. | e2e step "A professional joins from a phone and can immediately find help". |
+| "Public job cards never contain a person's name." | `scripts/privacy-probe.mjs` reads every hub row and finds no names. | `node/tests/test_public_cards_hold_no_names.py` fails if any title or company contains the person's own name (it caught "Iyer & Co. Legal"). |
+| "An outside AI can use it." | `node scripts/mcp-demo.mjs .env.vercel.production` or Claude Code with the commands in `.mcp-connect.txt`. | `match_need` is a tool on every server; the script prints HTTP 401 without a key and 0 names with one. |
